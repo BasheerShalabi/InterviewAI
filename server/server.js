@@ -8,6 +8,11 @@ app.use(cors())
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.get('/', (req, res) => res.send('Hello from server!'));
+require('./config/mongoose.config')
+
+app.use('/api/users', require('./routes/user.routes'));
+app.use('/api/sessions', require('./routes/session.routes'));
+app.use('/api/coaches', require('./routes/coach.routes'));
+
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
