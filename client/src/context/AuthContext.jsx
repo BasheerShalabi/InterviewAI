@@ -54,9 +54,9 @@ export const AuthProvider = ({ children }) => {
                 body: JSON.stringify({ fullname, email, password }),
             });
 
-            // if (!response.ok) {
-            //     throw new Error("Registration failed");
-            // }
+            if (!response.ok) {
+                throw new Error("Registration failed");
+            }
 
             const data = await response.json();
             console.log(data)

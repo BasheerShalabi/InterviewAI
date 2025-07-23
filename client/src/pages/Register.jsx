@@ -37,8 +37,8 @@ export default function Register() {
             return;
         }
 
-        const result = register(formData.fullname,formData.email,formData.password);
-
+        const result = await register(formData.fullname,formData.email,formData.password);
+        
         if (result.success) {
             navigate('/interview');
         } else {

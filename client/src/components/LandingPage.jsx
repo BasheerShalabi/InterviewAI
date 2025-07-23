@@ -2,8 +2,11 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { BotIcon, Code, Users, Clock, CheckCircle, Play, ArrowRight, FileText, Upload, Brain } from 'lucide-react';
 import { motion } from 'framer-motion';
+import HeaderComponent from './HeaderComponent';
+import { useAuth } from '../context/AuthContext';
 
 export default function LandingPage() {
+    const { user , logout } = useAuth();
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden">
             {/* Animated Background Elements */}
@@ -52,45 +55,7 @@ export default function LandingPage() {
             </div>
 
             {/* Header */}
-            <header className="bg-white/80 backdrop-blur-md border-b border-slate-200/50 sticky top-0 z-50 shadow-sm">
-                <div className="max-w-6xl mx-auto px-6 py-4">
-                    <div className="flex items-center justify-between">
-                        <motion.div
-                            className="flex items-center gap-3"
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.6 }}
-                        >
-                            <div className="p-2 bg-gradient-to-r from-slate-500 to-slate-600 rounded-xl shadow-lg">
-                                <BotIcon className="w-6 h-6 text-white" />
-                            </div>
-                            <span className="text-xl font-bold bg-gradient-to-r from-slate-700 to-slate-800 bg-clip-text text-transparent">
-                                InterviewAI
-                            </span>
-                        </motion.div>
-
-                        <motion.div
-                            className="flex items-center gap-4"
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.6, delay: 0.1 }}
-                        >
-                            <Link
-                                to="/login"
-                                className="text-slate-600 hover:text-slate-800 font-medium transition-all duration-300 hover:scale-105"
-                            >
-                                Sign In
-                            </Link>
-                            <Link
-                                to="/register"
-                                className="bg-gradient-to-r from-slate-600 to-slate-700 text-white px-6 py-2.5 rounded-xl font-medium hover:from-slate-700 hover:to-slate-800 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
-                            >
-                                Start Interview
-                            </Link>
-                        </motion.div>
-                    </div>
-                </div>
-            </header>
+           <HeaderComponent user={user} logout={logout}/>
 
             {/* Hero Section */}
             <section className="max-w-6xl mx-auto px-6 py-20">
