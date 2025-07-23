@@ -7,21 +7,22 @@ import Register from './pages/Register';
 import InterviewForm from './pages/InterviewForm';
 import ResultPage from './pages/ResultPage';
 import AdminDashboard from './pages/AdminDashboard';
-import UserDashboard from './pages/UserDashboard';
+import { AlertProvider } from './context/AlertContext';
 
 function App() {
   return (
-    <AuthProvider>
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/dashboard" element={<UserDashboard />} />
-        <Route path="/interview" element={<InterviewForm />} />
-        <Route path="/results/:id" element={<ResultPage />} />
-        <Route path="/admin" element={<AdminDashboard />} />
-      </Routes>
-    </AuthProvider>
+    <AlertProvider>
+      <AuthProvider>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/interview" element={<InterviewForm />} />
+          <Route path="/results/:id" element={<ResultPage />} />
+          <Route path="/admin" element={<AdminDashboard />} />
+        </Routes>
+      </AuthProvider>
+    </AlertProvider>
   );
 }
 

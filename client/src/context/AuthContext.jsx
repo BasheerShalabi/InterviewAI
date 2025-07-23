@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
+import { useNavigate } from "react-router-dom";
+import { useAlert } from './AlertContext';
 
 // Create the context with a default value (will be overridden)
 const AuthContext = createContext({
@@ -13,6 +15,8 @@ const AuthContext = createContext({
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
+    const redirect = useNavigate();
+    const {showAlert} = useAlert();
 
     useEffect(() => {
         const token = localStorage.getItem("session");
@@ -30,7 +34,9 @@ export const AuthProvider = ({ children }) => {
 
     const logout = () => {
         localStorage.removeItem("session");
+        showAlert("Logged out successfully", "info");
         setUser(null);
+        redirect('/');
     };
 
     const login = (token) => {
@@ -38,9 +44,11 @@ export const AuthProvider = ({ children }) => {
         try {
             const decodedUser = jwtDecode(token);
             setUser(decodedUser);
+            showAlert("Logged in successfully", "success");
             console.log("UserToken logged in:", decodedUser);
         } catch (err) {
             console.error("Invalid token:", err);
+            showAlert(err, "error");
         }
     };
 
@@ -64,6 +72,7 @@ export const AuthProvider = ({ children }) => {
             return { success: true };
         } catch (error) {
             console.error("Registration error:", error);
+            showAlert(err, "error");
             return { success: false, error: error.message };
         }
     }

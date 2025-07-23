@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Upload, FileText, User, Briefcase, Clock, ArrowRight, CheckCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import axios from 'axios';
 import FooterComponent from '../components/FooterComponent';
 
 export default function InterviewForm() {
@@ -32,20 +33,32 @@ export default function InterviewForm() {
         const file = e.target.files[0];
         setFormData({
             ...formData,
-            cvFile: file
+            cv: file
         });
     };
 
     const analyzeCv = async () => {
         setLoading(true);
-        // Simulate CV analysis
+
+
+        const res = await axios.post('http://localhost:8000/api/cv/upload', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+
+        console.log(res.data);
+
+        setFormData({
+            ...formData,
+            raw: res.data.raw,
+        });
+
         setTimeout(() => {
             setCvAnalysis({
-                skills: ['React', 'Node.js', 'Python', 'MongoDB'],
-                experience: '5+ years',
-                match: 92,
-                strengths: ['Full-stack development', 'Team leadership', 'Problem solving'],
-                recommendations: ['Focus on system design', 'Test algorithmic thinking']
+                skills: res.data.result.skills,
+                experience: res.data.result.experience,
+                match: res.data.result.score,
+                strengths: res.data.result.strengths,
+                recommendations: res.data.result.recommendations
             });
             setLoading(false);
             setStep(3);
@@ -77,8 +90,8 @@ export default function InterviewForm() {
                             >
                                 <div
                                     className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${step >= stepNum
-                                            ? 'bg-slate-600 text-white'
-                                            : 'bg-slate-200 text-slate-500'
+                                        ? 'bg-slate-600 text-white'
+                                        : 'bg-slate-200 text-slate-500'
                                         }`}
                                 >
                                     {step > stepNum ? <CheckCircle className="w-5 h-5" /> : stepNum}
@@ -200,9 +213,9 @@ export default function InterviewForm() {
                                     </label>
                                 </p>
                                 <p className="text-sm text-slate-500">PDF, DOC, DOCX up to 10MB</p>
-                                {formData.cvFile && (
+                                {formData.cv && (
                                     <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-                                        <p className="text-green-700 font-medium">{formData.cvFile.name}</p>
+                                        <p className="text-green-700 font-medium">{formData.cv.name}</p>
                                     </div>
                                 )}
                             </div>
@@ -211,7 +224,7 @@ export default function InterviewForm() {
                         <div className="flex justify-end mt-8">
                             <motion.button
                                 onClick={() => setStep(2)}
-                                disabled={!formData.candidateName || !formData.candidateEmail || !formData.position || !formData.cvFile}
+                                disabled={!formData.candidateName || !formData.candidateEmail || !formData.position || !formData.cv}
                                 className="bg-gradient-to-r from-slate-600 to-slate-700 text-white px-8 py-3 rounded-xl font-semibold hover:from-slate-700 hover:to-slate-800 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}
