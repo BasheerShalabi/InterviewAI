@@ -10,7 +10,6 @@ export default function Register() {
         email: '',
         password: '',
         confirmPassword: '',
-        role: 'interviewer'
     });
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -38,7 +37,7 @@ export default function Register() {
             return;
         }
 
-        const result = register(formData);
+        const result = register(formData.fullname,formData.email,formData.password);
 
         if (result.success) {
             navigate('/interview');
