@@ -44,21 +44,22 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const register = async (name, email, password) => {
+    const register = async (fullname, email, password) => {
         try {
             const response = await fetch("http://localhost:8000/api/users/register", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ name, email, password }),
+                body: JSON.stringify({ fullname, email, password }),
             });
 
-            if (!response.ok) {
-                throw new Error("Registration failed");
-            }
+            // if (!response.ok) {
+            //     throw new Error("Registration failed");
+            // }
 
             const data = await response.json();
+            console.log(data)
             login(data.token);
             return { success: true };
         } catch (error) {

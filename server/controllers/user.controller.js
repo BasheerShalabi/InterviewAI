@@ -11,7 +11,11 @@ module.exports.registerUser = async (req, res) => {
         const newUser = new User({ fullname, email, password });
         await newUser.save();
 
-        res.status(201).json({ message: "User registered successfully" });
+         const token = jwt.sign({ id: newUser._id, role: newUser.role , fullname: newUser.fullname }, JWT_SECRET, {
+            expiresIn: '1h'
+        });
+
+        res.status(201).json({ message: "User registered successfully" , token : token });
     } catch (err) {
         res.status(400).json({ error: err.message });
     }
@@ -31,7 +35,7 @@ module.exports.loginUser = async (req, res) => {
             expiresIn: '1h'
         });
 
-        res.json({ token });
+        res.json({  token : token });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

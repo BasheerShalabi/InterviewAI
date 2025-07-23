@@ -28,15 +28,27 @@ export default function Login() {
         setLoading(true);
         setError('');
 
-        const result = await login(formData.email, formData.password);
+        try {
+            const response = await fetch("http://localhost:8000/api/users/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(formData),
+            });
 
-        if (result.success) {
-            navigate('/interview');
-        } else {
-            setError(result.error);
+            if (response.ok) {
+                const data = await response.json();
+                login(data.token);
+                navigate('/interview');
+            }
+    
+            setLoading(false);
+        } catch (error) {
+            console.error("Login error:", error);
+            return { success: false, error: error.message };
         }
 
-        setLoading(false);
     };
 
     return (
