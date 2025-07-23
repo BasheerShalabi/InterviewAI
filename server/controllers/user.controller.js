@@ -1,4 +1,4 @@
-const User = require('../models/User');
+const User = require('../models/user.model');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
@@ -6,9 +6,9 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 module.exports.registerUser = async (req, res) => {
     try {
-        const { fullname, email, password, role } = req.body;
+        const { fullname, email, password } = req.body;
 
-        const newUser = new User({ fullname, email, password, role });
+        const newUser = new User({ fullname, email, password });
         await newUser.save();
 
         res.status(201).json({ message: "User registered successfully" });

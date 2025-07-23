@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const coachController = require('../controllers/coachController');
+const coachController = require('../controllers/coach.controller');
 const verifyToken = require('../middlewares/auth.middleware');
 const requireRole = require('../middlewares/role.middleware');
 
