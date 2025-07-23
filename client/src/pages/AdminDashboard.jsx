@@ -129,6 +129,8 @@ export default function AdminDashboard() {
     }
 
     return (
+            <>
+
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-6">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
@@ -335,5 +337,8 @@ export default function AdminDashboard() {
                 </motion.div>
             </div>
         </div>
+        {/* Footer */}
+        <FooterComponent />
+    </>
     );
 }
