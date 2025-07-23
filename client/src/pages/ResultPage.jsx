@@ -114,6 +114,7 @@ export default function ResultsPage() {
     }
 
     return (
+        <>
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-6">
             <div className="max-w-6xl mx-auto">
                 {/* Header */}
@@ -361,5 +362,8 @@ export default function ResultsPage() {
                 </div>
             </div>
         </div>
+            {/* Footer */}
+            <FooterComponent />
+        </>
     );
 }

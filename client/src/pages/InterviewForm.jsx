@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Upload, FileText, User, Briefcase, Clock, ArrowRight, CheckCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import FooterComponent from '../components/FooterComponent';
 
 export default function InterviewForm() {
     const [step, setStep] = useState(1);
@@ -57,6 +58,9 @@ export default function InterviewForm() {
     };
 
     return (
+        <>
+        
+        
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-6">
             <div className="max-w-4xl mx-auto">
                 {/* Progress Bar */}
@@ -404,6 +408,11 @@ export default function InterviewForm() {
                     </motion.div>
                 )}
             </div>
+
+
         </div>
+            {/* Footer */}
+            <FooterComponent />
+        </>
     );
 }
