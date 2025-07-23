@@ -6,11 +6,14 @@ const SessionSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
-  jobRole: {
+  raw: {
     type: String,
-    required: [true, "Job role is required."],
-    minlength: [3, "Job role must be more than 3 chars."],
-    maxlength: [50, "Job role cannot be greater than or equal to 50 chars."]
+    required: true,
+  },
+  type:{
+    type: String,
+    enum: ['behavioural', 'technical' , 'hybrid'],
+    required: true
   },
   messages: [
     {

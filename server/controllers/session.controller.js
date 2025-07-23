@@ -4,12 +4,13 @@ const parseAiFeedback = require('../utils/parser');
 
 module.exports.createSession = async (req, res) => {
     try {
-        const { jobRole, numQuestions } = req.body;
+        const { raw, numQuestions , type } = req.body;
         const userId = req.user.id;
 
         const newSession = await Session.create({
             userId,
-            jobRole,
+            raw,
+            type,
             messages: [],
             feedback: [],
             numQuestions
@@ -60,8 +61,28 @@ module.exports.sendMessage = async (req, res) => {
 
         if (assistantMessagesCount < session.numQuestions) {
 
+            const prompt = `
+            You are a senior HR interviewer at a top-tier tech company. Your task is to conduct a realistic mock interview with a candidate.
+
+            Below is the candidate’s raw CV text, extracted from a PDF:
+            <CV>
+            ${session.raw}
+            </CV>
+
+            Conduct a ${session.type} interview (choose from: technical, behavioral, hybrid). Ask the candidate ${session.numQuestions} thoughtful and relevant interview questions **one at a time**.
+
+            After each question, wait for the candidate’s answer before continuing to the next. Do not rush. Make the questions personalized based on the CV where possible.
+
+            Keep your tone professional and supportive, but simulate a real interview scenario. Vary your questions appropriately for the interview type
+
+            Start with a brief introduction, then begin the interview.
+
+            Important: Stay in character as the interviewer and maintain the back-and-forth format until the interview ends.
+                        
+            `
+
             const aiInputMessages = [
-                { role: 'system', content: `You are a helpful interview coach for the job role: ${session.jobRole}. Ask questions to assess the candidate.` },
+                { role: 'system', content: prompt },
                 ...session.messages,
             ];
 
