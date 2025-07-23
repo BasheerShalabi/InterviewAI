@@ -5,7 +5,7 @@ const verifyToken = require('../middlewares/auth.middleware');
 const requireRole = require('../middlewares/role.middleware');
 
 
-router.get('/', verifyToken, coachController.getAllCoaches);
+router.get('/', coachController.getAllCoaches);
 
 router.get('/requests', verifyToken, requireRole(['coach','admin']), coachController.getCoachRequests);
 

@@ -23,9 +23,14 @@ module.exports.requestCoach = async (req, res) => {
         return res.status(400).json({ message: "You already have a pending request." });
 
     user.pendingCoachRequest = coach._id;
+
+    const token = jwt.sign({ id: user._id, role: user.role, fullname: user.fullname }, process.env.JWT_SECRET, {
+                expiresIn: '1h'
+            });
+
     await user.save();
 
-    res.json({ message: "Coach request sent." });
+    res.json({ message: "Coach request sent." , token:token});
 };
 
 module.exports.getCoachRequests = async (req, res) => {
