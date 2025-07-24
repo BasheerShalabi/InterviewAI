@@ -11,7 +11,7 @@ async function callAiModel(messages) {
                 'Content-Type': 'application/json',
             },
         });
-
+        console.log("AI response:", response.data.choices[0].message.content);
         return response.data.choices[0].message.content;
     } catch (error) {
         console.error('Error calling AI model:', error.response?.data || error.message);

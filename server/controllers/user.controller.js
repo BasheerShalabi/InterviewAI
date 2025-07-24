@@ -12,7 +12,7 @@ module.exports.registerUser = async (req, res) => {
         await newUser.save();
 
          const token = jwt.sign({ id: newUser._id, role: newUser.role , fullname: newUser.fullname }, JWT_SECRET, {
-            expiresIn: '1h'
+            expiresIn: '1d'
         });
 
         res.status(201).json({ message: "User registered successfully" , token : token });
@@ -32,7 +32,7 @@ module.exports.loginUser = async (req, res) => {
         if (!isMatch) return res.status(401).json({ error: "Invalid email or password" });
 
         const token = jwt.sign({ id: user._id, role: user.role , fullname: user.fullname }, JWT_SECRET, {
-            expiresIn: '1h'
+            expiresIn: '1d'
         });
 
         res.json({  token : token });

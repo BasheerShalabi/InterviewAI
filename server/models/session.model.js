@@ -76,7 +76,11 @@ const SessionSchema = new mongoose.Schema({
   isComplete: {
     type: Boolean,
     default: false
-  }
+  },
+  inProgress: {
+    type: Boolean,
+    default: false
+  },
 })
 
 const Session = mongoose.model('Session', SessionSchema)

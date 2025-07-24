@@ -9,6 +9,6 @@ router.get('/', verifyToken, sessionController.getMySessions);
 
 router.get('/:id', verifyToken, sessionController.getSessionById);
 
-router.post('/:sessionId/message', sessionController.sendMessage);
+router.post('/:sessionId/message', verifyToken, sessionController.sendMessage);
 
 module.exports = router;
