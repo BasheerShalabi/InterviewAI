@@ -1,4 +1,3 @@
-import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import LandingPage from './components/LandingPage';
@@ -11,6 +10,7 @@ import { AlertProvider } from './context/AlertContext';
 import AIChatBox from './components/ChatBox';
 import UserDashboard from './pages/UserDashboard';
 import CoachDashboard from './pages/CoachDashboard';
+import ProtectedRoute from './context/ProtectContext';
 
 function App() {
   return (
@@ -20,12 +20,36 @@ function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/dashboard" element={<UserDashboard />} />
-          <Route path="/coach" element={<CoachDashboard />} />
-          <Route path="/interview" element={<InterviewForm />} />
-          <Route path="/results/:id" element={<ResultPage />} />
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/chat/session/:id" element={<AIChatBox />} />
+          <Route path="/dashboard" element={
+            <ProtectedRoute>
+              <UserDashboard />
+            </ProtectedRoute>
+            } />
+          <Route path="/coach" element={
+            <ProtectedRoute>
+            <CoachDashboard />
+            </ProtectedRoute>
+            } />
+          <Route path="/interview" element={
+            <ProtectedRoute>
+            <InterviewForm />
+            </ProtectedRoute>
+            } />
+          <Route path="/results/:id" element={
+            <ProtectedRoute>
+            <ResultPage />
+            </ProtectedRoute>
+            } />
+          <Route path="/admin" element={
+            <ProtectedRoute>
+            <AdminDashboard />
+            </ProtectedRoute>
+            } />
+          <Route path="/chat/session/:id" element={
+            <ProtectedRoute>
+            <AIChatBox />
+            </ProtectedRoute>
+            } />
         </Routes>
       </AuthProvider>
     </AlertProvider>
