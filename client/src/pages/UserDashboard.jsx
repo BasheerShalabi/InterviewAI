@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { motion } from "framer-motion";
 import {
     CalendarDays,
@@ -7,9 +8,13 @@ import {
     FileText,
     Star,
     Eye,
+    MessageCircle,
+    X,
 } from "lucide-react";
 import HeaderComponent from "../components/HeaderComponent";
 import { useAuth } from "../context/AuthContext";
+import FooterComponent from "../components/FooterComponent";
+import { Link } from "react-router-dom";
 
 export default function UserDashboard() {
     const { user, logout } = useAuth();
@@ -17,70 +22,180 @@ export default function UserDashboard() {
     const [loading, setLoading] = useState(true);
     const [coaches, setCoaches] = useState([]);
     const [selectedCoach, setSelectedCoach] = useState("");
-    const [coachRequested, setCoachRequested] = useState(user?.coachRequestPending);
+    const [coachRequested, setCoachRequested] = useState(user?.coachRequestPending || false);
+    const [chatOpen, setChatOpen] = useState(false);
+    const [currentCoach, setCurrentCoach] = useState("");
     const token = localStorage.getItem("session");
+    const [count , setCount] = useState(0);
 
-    console.log("UserToken:", user);
-    useEffect(() => {
-        const fetchCoaches = async () => {
-            try {
-                const res = await fetch("http://localhost:8000/api/coaches", {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                const data = await res.json();
-                setCoaches(data.map((c) => ({ id: c._id, name: c.fullname })));
-            } catch (err) {
-                console.error("Error fetching coaches:", err);
+
+    const fetchCoaches = async () => {  
+        try {
+            const res = await axios.get("http://localhost:8000/api/coaches", {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            const data = res.data;
+            setCoaches(data.map((c) => ({ id: c._id, name: c.fullname })));
+
+            if (user && user.coachId) {
+                const userCoachId = typeof user.coachId === "object" ? user.coachId._id : user.coachId;
+                const coachObj = data.find((c) => c._id === userCoachId);
+                if (coachObj) {
+                    setCurrentCoach(coachObj.fullname);
+                }
+
             }
-        };
+        } catch (err) {
+            console.error("Error fetching coaches:", err);
+        }
+    };
 
+    useEffect(() => {
         fetchCoaches();
+        fetchData();       
+        if (user && user.coachId && coaches.length > 0) {
+            const userCoachId = typeof user.coachId === "object" ? user.coachId._id : user.coachId;
+            const coachObj = coaches.find((c) => c.id === userCoachId);
+            if (coachObj) {
+                setCurrentCoach(coachObj.name);
+            }
+        }
+    }, [user, coaches]);
 
-        setTimeout(() => {
-            setInterviews([]);
-            setLoading(false);
-        }, 800);
-    }, []);
+    const getCurrentCoachName = () => {
+        if (!user || !user.coachId) return "";
+        
+        if (typeof user.coachId === "object" && user.coachId.fullname) {
+            return user.coachId.fullname;
+        }
+        
+        if (coaches.length > 0) {
+            const userCoachId = typeof user.coachId === "object" ? user.coachId._id : user.coachId;
+            const coachObj = coaches.find((c) => c.id === userCoachId);
+            return coachObj ? coachObj.name : "";
+        }
+        
+        return currentCoach;
+    };
 
     const completedCount = interviews.filter((i) => i.isCompleted).length;
 
-    const statusStyles = {
-        completed: "bg-green-100 text-green-700",
-        scheduled: "bg-blue-100 text-blue-700",
-        default: "bg-gray-100 text-gray-700",
+    const fetchData = async () => {
+        try {
+            const res = await fetch("http://localhost:8000/api/sessions", {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
+            });
+            const data = await res.json();
+            console.log("Fetched sessions:", data);
+            console.log(data.filter((i) => i.isComplete).length)
+            setCount(data.filter((i) => i.isComplete).length)
+            setInterviews(data); // أو سميها setSessions(data)
+        } catch (err) {
+            console.error("Failed to fetch sessions:", err);
+        } finally {
+            setLoading(false);
+        }
     };
 
+
+    
+    const statusStyles = {
+        completed: "bg-green-100 text-green-700",
+        inprogress: "bg-blue-100 text-blue-700",
+    };
+    
     const handleRequestCoach = async () => {
         if (!selectedCoach) return;
 
         try {
             const selected = coaches.find((c) => c.name === selectedCoach);
             if (!selected) return;
-            await fetch(`http://localhost:8000/api/users/request/${selected.id}`, {  // <== تعديل هنا
+            await fetch(`http://localhost:8000/api/users/request/${selected.id}`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${token}`,
                 },
             });
-
-            setCoachRequested(true); // ✅ تحويل الحالة إلى pending مباشرة
+            setCoachRequested(true);
         } catch (err) {
             console.error("Error sending request:", err);
             alert("Failed to send coach request.");
-            setCoachRequested(false); // ✅ تحويل الحالة إلى pending مباشرة
+            setCoachRequested(false);
         }
     };
 
-    if (loading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-indigo-100">
+    const renderedData = interviews.map((session, index) => (
+        <motion.div
+        key={session.id}
+        className="bg-white/80 backdrop-blur-xl shadow-xl rounded-2xl p-6 border border-white/20"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 * index }}
+        >
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-xl font-semibold text-slate-800">
+          {session.type} Interview
+        </h3>
+        <span
+          className={`text-sm px-3 py-1 rounded-full font-medium capitalize ${
+            session.isComplete ? statusStyles.completed : statusStyles.inprogress
+            }`}
+            >
+          {session.isComplete ? "Completed" : "In Progress"}
+        </span>
+      </div>
+
+      <div className="text-slate-600 space-y-1 mb-4 text-sm">
+        <p className="flex items-center gap-2">
+          <CalendarDays className="w-4 h-4" />
+          {session.createdAt.split("T")[0]}
+        </p>
+        <p className="flex items-center gap-2">
+          <Clock className="w-4 h-4" />
+          {session.createdAt.split("T")[1].split(".")[0]}
+        </p>
+        <p className="flex items-center gap-2">
+          <CheckCircle className="w-4 h-4" />
+          Coach: {user.coachId}
+        </p>
+      </div>
+
+      {session.isComplete && session.feedback.length != 0 && (
+          <div className="bg-indigo-50 border-l-4 border-indigo-400 p-4 rounded-lg text-sm">
+          <div className="flex items-center gap-2 text-indigo-700 mb-1 font-medium">
+            <Star className="w-4 h-4" />
+            Feedback
+          </div>
+            {session.feedback.map(e=>{
+          return <p className="text-slate-700">
+            {e.questionNumber}: {e.content};
+          </p>
+          })}
+        </div>
+      )}
+
+      <div className="mt-4 text-right">
+        <Link to={`/chat/session/${session._id}`} className="inline-flex items-center gap-2 px-4 py-2 bg-slate-700 text-white rounded-xl hover:bg-slate-800 transition-all duration-300 text-sm">
+        <Eye className="w-4 h-4" />
+          View Details
+        </Link>
+      </div>
+    </motion.div>
+  ))
+  
+  if (loading) {
+      return (
+          <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-indigo-100">
                 <motion.div className="text-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                     <motion.div
                         className="w-16 h-16 border-4 border-slate-300 border-t-indigo-600 rounded-full mx-auto mb-4"
                         animate={{ rotate: 360 }}
                         transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    />
+                        />
                     <p className="text-slate-600">Loading your dashboard...</p>
                 </motion.div>
             </div>
@@ -88,7 +203,8 @@ export default function UserDashboard() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-100">
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-100 relative">
+
             <HeaderComponent user={user} logout={logout} />
 
             <div className="p-6 max-w-4xl mx-auto">
@@ -109,7 +225,7 @@ export default function UserDashboard() {
                         animate={{ opacity: 1, y: 0 }}
                     >
                         <div className="text-green-700 font-semibold text-base text-center">
-                            ✅ Completed: {completedCount}
+                            ✅ Completed: {count}
                         </div>
                     </motion.div>
 
@@ -119,10 +235,10 @@ export default function UserDashboard() {
                         animate={{ opacity: 1, y: 0 }}
                     >
                         <div className="text-center text-green-700 font-semibold text-base">
-                            {coachRequested || user.requestId!=null ? (
+                            {coachRequested || user?.requestId != null ? (
                                 <>⏳ Request Pending</>
-                            ) : user.coachName ? (
-                                <>👤 Coach: {user.coachName}</>
+                            ) : user?.coachId != null ? (
+                                <>👤 Coach: {getCurrentCoachName() || "Loading..."}</>
                             ) : (
                                 <div className="space-y-2">
                                     <select
@@ -168,63 +284,53 @@ export default function UserDashboard() {
                     </div>
                 ) : (
                     <div className="space-y-6">
-                        {interviews.map((interview, index) => (
-                            <motion.div
-                                key={interview.id}
-                                className="bg-white/80 backdrop-blur-xl shadow-xl rounded-2xl p-6 border border-white/20"
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.1 * index }}
-                            >
-                                <div className="flex items-center justify-between mb-3">
-                                    <h3 className="text-xl font-semibold text-slate-800">
-                                        {interview.position}
-                                    </h3>
-                                    <span
-                                        className={`text-sm px-3 py-1 rounded-full font-medium capitalize ${
-                                            statusStyles[interview.status] || statusStyles.default
-                                        }`}
-                                    >
-                                        {interview.status}
-                                    </span>
-                                </div>
 
-                                <div className="text-slate-600 space-y-1 mb-4 text-sm">
-                                    <p className="flex items-center gap-2">
-                                        <CalendarDays className="w-4 h-4" />
-                                        {interview.date}
-                                    </p>
-                                    <p className="flex items-center gap-2">
-                                        <Clock className="w-4 h-4" />
-                                        {interview.time}
-                                    </p>
-                                    <p className="flex items-center gap-2">
-                                        <CheckCircle className="w-4 h-4" />
-                                        Interviewer: {interview.interviewer}
-                                    </p>
-                                </div>
+  {renderedData}
+</div>
 
-                                {interview.status === "completed" && interview.feedback && (
-                                    <div className="bg-indigo-50 border-l-4 border-indigo-400 p-4 rounded-lg text-sm">
-                                        <div className="flex items-center gap-2 text-indigo-700 mb-1 font-medium">
-                                            <Star className="w-4 h-4" />
-                                            Feedback
-                                        </div>
-                                        <p className="text-slate-700">{interview.feedback}</p>
-                                    </div>
-                                )}
-
-                                <div className="mt-4 text-right">
-                                    <button className="inline-flex items-center gap-2 px-4 py-2 bg-slate-700 text-white rounded-xl hover:bg-slate-800 transition-all duration-300 text-sm">
-                                        <Eye className="w-4 h-4" />
-                                        View Details
-                                    </button>
-                                </div>
-                            </motion.div>
-                        ))}
-                    </div>
                 )}
             </div>
+
+            {/* Chat Button */}
+            <button
+                onClick={() => setChatOpen(!chatOpen)}
+                className="fixed bottom-6 right-6 bg-indigo-600 hover:bg-indigo-700 text-white p-3 rounded-full shadow-lg transition-all duration-300"
+                title="Open chat"
+            >
+                <MessageCircle className="w-6 h-6" />
+            </button>
+
+            {/* Chat Popup Window */}
+            {chatOpen && (
+                <div className="fixed bottom-20 right-6 w-80 bg-white rounded-2xl shadow-xl p-4 border border-gray-200 z-50">
+                    <div className="flex justify-between items-center mb-2">
+                        <h2 className="text-lg font-semibold text-slate-800">Live Chat</h2>
+                        <button
+                            className="text-gray-500 hover:text-red-500"
+                            onClick={() => setChatOpen(false)}
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+                    </div>
+                    <div className="h-48 overflow-y-auto p-2 text-sm text-slate-700 space-y-2">
+                        <div className="bg-indigo-100 p-2 rounded-md w-fit">Hi! How can I help you?</div>
+                        {/* Placeholder messages */}
+                    </div>
+                    <div className="mt-2 flex">
+                        <input
+                            type="text"
+                            placeholder="Type a message..."
+                            className="flex-1 border border-gray-300 rounded-l-md p-2 text-sm focus:outline-none"
+                        />
+                        <button className="bg-indigo-600 text-white px-4 rounded-r-md hover:bg-indigo-700 text-sm">
+                            Send
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
+        <FooterComponent />
+        </>
+
     );
 }

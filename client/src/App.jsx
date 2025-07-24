@@ -7,10 +7,10 @@ import InterviewForm from './pages/InterviewForm';
 import ResultPage from './pages/ResultPage';
 import AdminDashboard from './pages/AdminDashboard';
 import { AlertProvider } from './context/AlertContext';
-import AIChatBox from './components/ChatBox';
 import UserDashboard from './pages/UserDashboard';
 import CoachDashboard from './pages/CoachDashboard';
 import ProtectedRoute from './context/ProtectContext';
+import ChatBoxPage from './pages/ChatBoxPage';
 
 function App() {
   return (
@@ -47,9 +47,10 @@ function App() {
             } />
           <Route path="/chat/session/:id" element={
             <ProtectedRoute>
-            <AIChatBox />
+            <ChatBoxPage />
             </ProtectedRoute>
             } />
+
         </Routes>
       </AuthProvider>
     </AlertProvider>

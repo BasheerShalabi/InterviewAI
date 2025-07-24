@@ -385,6 +385,9 @@ import {
 import FooterComponent from '../components/FooterComponent';
 import { useAlert } from '../context/AlertContext';
 import axios from 'axios';
+import { useAuth } from '../context/AuthContext';
+
+import HeaderComponent from '../components/HeaderComponent';
 
 export default function ResultsPage() {
     const { id } = useParams();
@@ -393,6 +396,7 @@ export default function ResultsPage() {
     const token = localStorage.getItem("session");
     const redirect = useNavigate()
     const {showAlert} = useAlert()
+    const {user,logout} = useAuth()
 
 
     const fetchSession = async () => {
@@ -491,6 +495,7 @@ export default function ResultsPage() {
 
     return (
         <>
+        <HeaderComponent user={user} logout={logout}/>
             <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-6">
                 <div className="max-w-6xl mx-auto">
                     {/* Header */}

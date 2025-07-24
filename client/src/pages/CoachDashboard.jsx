@@ -7,22 +7,19 @@ import { useAuth } from "../context/AuthContext";
 export default function CoachDashboard() {
     const { user, logout } = useAuth();
     const [requests, setRequests] = useState([]);
-    const [assignedUsers, setAssignedUsers] = useState([]);  // جديد
+    const [assignedUsers, setAssignedUsers] = useState([]);
     const [loading, setLoading] = useState(true);
+    const token = localStorage.getItem("session");
 
     useEffect(() => {
-        const fetchRequests = async () => {
+        const fetchRequestsAndUsers = async () => {
             try {
-                const token = localStorage.getItem("session");
-
-                // جلب طلبات الكوتش
                 const resRequests = await fetch("http://localhost:8000/api/coaches/requests", {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 const dataRequests = await resRequests.json();
                 setRequests(Array.isArray(dataRequests) ? dataRequests : []);
 
-                // جلب المستخدمين المعينين لهذا الكوتش
                 const resUsers = await fetch("http://localhost:8000/api/coaches/assigned-users", {
                     headers: { Authorization: `Bearer ${token}` },
                 });
@@ -37,20 +34,24 @@ export default function CoachDashboard() {
             }
         };
 
-        fetchRequests();
+        fetchRequestsAndUsers();
     }, []);
 
     const handleAccept = async (userId) => {
         try {
-            const token = localStorage.getItem("session");
             await fetch(`http://localhost:8000/api/coaches/respond/${userId}`, {
                 method: "POST",
-                headers: { "Authorization": `Bearer ${token}` ,"Content-Type": "application/json",},
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
                 body: JSON.stringify({ accept: true }),
             });
-            // إزالة الطلب المقبول من قائمة الطلبات
+
+            // تحديث قائمة الطلبات بإزالة المقبول
             setRequests((prev) => prev.filter((r) => r._id !== userId));
-            // إعادة جلب المستخدمين المعينين بعد قبول الطلب
+
+            // تحديث قائمة المستخدمين المعينين
             const resUsers = await fetch("http://localhost:8000/api/coaches/assigned-users", {
                 headers: { Authorization: `Bearer ${token}` },
             });
@@ -81,8 +82,6 @@ export default function CoachDashboard() {
             <HeaderComponent user={user} logout={logout} />
 
             <div className="p-6 max-w-4xl mx-auto">
-
-                {/* ترحيب الكوتش */}
                 <motion.div
                     className="mb-8"
                     initial={{ opacity: 0, y: -10 }}
@@ -93,7 +92,6 @@ export default function CoachDashboard() {
                     </h1>
                 </motion.div>
 
-                {/* طلبات الكوتش */}
                 <section className="mb-12">
                     <h2 className="text-2xl font-semibold mb-4 text-slate-700">Pending Coaching Requests</h2>
                     {requests.length === 0 ? (
@@ -138,15 +136,12 @@ export default function CoachDashboard() {
                     )}
                 </section>
 
-                {/* قائمة المستخدمين الذين اختاروا الكوتش */}
                 <section>
                     <h2 className="text-2xl font-semibold mb-4 text-slate-700">Users Assigned to You</h2>
                     {assignedUsers.length === 0 ? (
                         <div className="text-center py-12">
                             <User className="w-10 h-10 text-slate-400 mx-auto mb-4" />
-                            <p className="text-slate-600 text-lg">
-                                No users assigned to you yet.
-                            </p>
+                            <p className="text-slate-600 text-lg">No users assigned to you yet.</p>
                         </div>
                     ) : (
                         <div className="space-y-4">
@@ -167,7 +162,6 @@ export default function CoachDashboard() {
                         </div>
                     )}
                 </section>
-
             </div>
         </div>
     );
