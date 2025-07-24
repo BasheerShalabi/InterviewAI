@@ -9,6 +9,7 @@ const AuthContext = createContext({
     login: () => { },
     logout: () => { },
     register: () => { },
+    update: () => { },
     loading: true,
 });
 
@@ -52,6 +53,14 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const update = (token) => {
+        localStorage.removeItem("session");
+        localStorage.setItem("session", token);
+        const decodedUser = jwtDecode(token);
+        setUser(decodedUser);
+
+    }
+
     const register = async (fullname, email, password) => {
         try {
             const response = await fetch("http://localhost:8000/api/users/register", {
@@ -78,7 +87,7 @@ export const AuthProvider = ({ children }) => {
     }
 
     return (
-        <AuthContext.Provider value={{ loading, user, logout, login , register }}>
+        <AuthContext.Provider value={{ loading, user, logout, login , register , update }}>
             {children}
         </AuthContext.Provider>
     );

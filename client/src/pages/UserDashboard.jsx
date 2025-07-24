@@ -11,45 +11,38 @@ import {
 import HeaderComponent from "../components/HeaderComponent";
 import { useAuth } from "../context/AuthContext";
 
-export default function UserDashboard(props) {
+export default function UserDashboard() {
     const { user, logout } = useAuth();
     const [interviews, setInterviews] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [coaches, setCoaches] = useState([
-        { id: "1", name: "Coach Ali" },
-        { id: "2", name: "Coach Sarah" },
-        { id: "3", name: "Coach John" },
-    ]);
+    const [coaches, setCoaches] = useState([]);
     const [selectedCoach, setSelectedCoach] = useState("");
+    const [coachRequested, setCoachRequested] = useState(user?.coachRequestPending);
+    const token = localStorage.getItem("session");
 
+    console.log("UserToken:", user);
     useEffect(() => {
+        const fetchCoaches = async () => {
+            try {
+                const res = await fetch("http://localhost:8000/api/coaches", {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                const data = await res.json();
+                setCoaches(data.map((c) => ({ id: c._id, name: c.fullname })));
+            } catch (err) {
+                console.error("Error fetching coaches:", err);
+            }
+        };
+
+        fetchCoaches();
+
         setTimeout(() => {
-            setInterviews([
-                {
-                    id: 1,
-                    position: "Frontend Developer",
-                    date: "2025-07-25",
-                    time: "10:00 AM",
-                    status: "scheduled",
-                    interviewer: "Jane Doe",
-                    feedback: null,
-                },
-                {
-                    id: 2,
-                    position: "UI Designer",
-                    date: "2025-07-15",
-                    time: "02:30 PM",
-                    status: "completed",
-                    interviewer: "Sarah Lee",
-                    feedback: "Great attention to detail. Impressive design portfolio.",
-                    isCompleted: true
-                },
-            ]);
+            setInterviews([]);
             setLoading(false);
         }, 800);
     }, []);
 
-    const completedCount = interviews.filter(i => i.isCompleted).length;
+    const completedCount = interviews.filter((i) => i.isCompleted).length;
 
     const statusStyles = {
         completed: "bg-green-100 text-green-700",
@@ -57,10 +50,25 @@ export default function UserDashboard(props) {
         default: "bg-gray-100 text-gray-700",
     };
 
-    const handleRequestCoach = () => {
-        if (selectedCoach) {
-            alert(`Requested coach: ${selectedCoach}`);
-            // send request to backend here
+    const handleRequestCoach = async () => {
+        if (!selectedCoach) return;
+
+        try {
+            const selected = coaches.find((c) => c.name === selectedCoach);
+            if (!selected) return;
+            await fetch(`http://localhost:8000/api/users/request/${selected.id}`, {  // <== تعديل هنا
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
+            });
+
+            setCoachRequested(true); // ✅ تحويل الحالة إلى pending مباشرة
+        } catch (err) {
+            console.error("Error sending request:", err);
+            alert("Failed to send coach request.");
+            setCoachRequested(false); // ✅ تحويل الحالة إلى pending مباشرة
         }
     };
 
@@ -105,14 +113,13 @@ export default function UserDashboard(props) {
                         </div>
                     </motion.div>
 
-                    {/* ✅ مدرب أو طلب مدرب */}
                     <motion.div
                         className="bg-white/80 backdrop-blur-xl shadow-xl rounded-2xl p-4 border border-white/20 max-w-xs flex-1"
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                     >
                         <div className="text-center text-green-700 font-semibold text-base">
-                            {user.coachRequestPending ? (
+                            {coachRequested || user.requestId!=null ? (
                                 <>⏳ Request Pending</>
                             ) : user.coachName ? (
                                 <>👤 Coach: {user.coachName}</>
@@ -147,7 +154,7 @@ export default function UserDashboard(props) {
                         animate={{ opacity: 1, y: 0 }}
                     >
                         <div className="text-green-700 font-semibold text-base text-center">
-                            Number of interview: {interviews.length}
+                            Number of interviews: {interviews.length}
                         </div>
                     </motion.div>
                 </div>
@@ -174,8 +181,9 @@ export default function UserDashboard(props) {
                                         {interview.position}
                                     </h3>
                                     <span
-                                        className={`text-sm px-3 py-1 rounded-full font-medium capitalize ${statusStyles[interview.status] || statusStyles.default
-                                            }`}
+                                        className={`text-sm px-3 py-1 rounded-full font-medium capitalize ${
+                                            statusStyles[interview.status] || statusStyles.default
+                                        }`}
                                     >
                                         {interview.status}
                                     </span>
@@ -202,9 +210,7 @@ export default function UserDashboard(props) {
                                             <Star className="w-4 h-4" />
                                             Feedback
                                         </div>
-                                        <p className="text-slate-700">
-                                            {interview.feedback}
-                                        </p>
+                                        <p className="text-slate-700">{interview.feedback}</p>
                                     </div>
                                 )}
 
