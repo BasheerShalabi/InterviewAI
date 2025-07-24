@@ -202,7 +202,7 @@ export default function UserDashboard() {
         );
     }
 
-    return (
+    return (<>
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-100 relative">
 
             <HeaderComponent user={user} logout={logout} />
