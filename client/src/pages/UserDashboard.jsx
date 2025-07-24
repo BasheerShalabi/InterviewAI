@@ -17,11 +17,13 @@ export default function UserDashboard() {
     const [loading, setLoading] = useState(true);
     const [coaches, setCoaches] = useState([]);
     const [selectedCoach, setSelectedCoach] = useState("");
+    const [coachRequested, setCoachRequested] = useState(user?.coachRequestPending);
+    const token = localStorage.getItem("session");
 
+    console.log("UserToken:", user);
     useEffect(() => {
         const fetchCoaches = async () => {
             try {
-                const token = localStorage.getItem("token");
                 const res = await fetch("http://localhost:8000/api/coaches", {
                     headers: { Authorization: `Bearer ${token}` },
                 });
@@ -34,35 +36,13 @@ export default function UserDashboard() {
 
         fetchCoaches();
 
-        // Dummy interviews (replace with real API later)
         setTimeout(() => {
-            setInterviews([
-                // {
-                //     id: 1,
-                //     position: "Frontend Developer",
-                //     date: "2025-07-25",
-                //     time: "10:00 AM",
-                //     status: "scheduled",
-                //     interviewer: "Jane Doe",
-                //     feedback: null,
-                // },
-                // {
-                //     id: 2,
-                //     position: "UI Designer",
-                //     date: "2025-07-15",
-                //     time: "02:30 PM",
-                //     status: "completed",
-                //     interviewer: "Sarah Lee",
-                //     feedback: "Great attention to detail. Impressive design portfolio.",
-                //     isCompleted: true,
-                // },
-            ]);
+            setInterviews([]);
             setLoading(false);
         }, 800);
     }, []);
 
     const completedCount = interviews.filter((i) => i.isCompleted).length;
-    console.log(interviews)
 
     const statusStyles = {
         completed: "bg-green-100 text-green-700",
@@ -76,24 +56,19 @@ export default function UserDashboard() {
         try {
             const selected = coaches.find((c) => c.name === selectedCoach);
             if (!selected) return;
-
-            const token = localStorage.getItem("token");
-
-            const res = await fetch(`http://localhost:8000/api/coaches/request/${selected.id}`, {
+            await fetch(`http://localhost:8000/api/users/request/${selected.id}`, {  // <== تعديل هنا
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
+                    "Authorization": `Bearer ${token}`,
                 },
             });
 
-
-
-            alert("Coach request sent.");
-            window.location.reload();
+            setCoachRequested(true); // ✅ تحويل الحالة إلى pending مباشرة
         } catch (err) {
             console.error("Error sending request:", err);
             alert("Failed to send coach request.");
+            setCoachRequested(false); // ✅ تحويل الحالة إلى pending مباشرة
         }
     };
 
@@ -138,14 +113,13 @@ export default function UserDashboard() {
                         </div>
                     </motion.div>
 
-                    {/* ✅ مدرب أو طلب مدرب */}
                     <motion.div
                         className="bg-white/80 backdrop-blur-xl shadow-xl rounded-2xl p-4 border border-white/20 max-w-xs flex-1"
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                     >
                         <div className="text-center text-green-700 font-semibold text-base">
-                            {user.coachRequestPending ? (
+                            {coachRequested || user.requestId!=null ? (
                                 <>⏳ Request Pending</>
                             ) : user.coachName ? (
                                 <>👤 Coach: {user.coachName}</>

@@ -11,7 +11,7 @@ module.exports.registerUser = async (req, res) => {
         const newUser = new User({ fullname, email, password, role });
         await newUser.save();
 
-        const token = jwt.sign({ id: newUser._id, role: newUser.role, fullname: newUser.fullname }, JWT_SECRET, {
+        const token = jwt.sign({ id: newUser._id, role: newUser.role, fullname: newUser.fullname , requestId:newUser.pendingCoachRequest ,coachId: newUser.assignedCoachId   }, JWT_SECRET, {
             expiresIn: '1h'
         });
 
@@ -31,7 +31,7 @@ module.exports.loginUser = async (req, res) => {
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(401).json({ error: "Invalid email or password" });
 
-        const token = jwt.sign({ id: user._id, role: user.role, fullname: user.fullname }, JWT_SECRET, {
+        const token = jwt.sign({ id: user._id, role: user.role, fullname: user.fullname , requestId:user.pendingCoachRequest ,coachId: user.assignedCoachId }, JWT_SECRET, {
             expiresIn: '1h'
         });
 

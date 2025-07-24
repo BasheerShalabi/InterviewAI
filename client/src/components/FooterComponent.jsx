@@ -3,9 +3,9 @@ import { Link } from 'react-router-dom';
 import { BotIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
 const FooterComponent = () => {
-  return (
-    <div>
-       <footer className="bg-slate-900/90 backdrop-blur-sm text-white py-12 border-t border-slate-700/50">
+    return (
+        <div>
+            <footer className="bg-slate-900/90 backdrop-blur-sm text-white py-12 border-t border-slate-700/50">
                 <div className="max-w-6xl mx-auto px-6">
                     <div className="flex items-center justify-between">
                         <motion.div
@@ -32,8 +32,8 @@ const FooterComponent = () => {
                     </div>
                 </div>
             </footer>
-    </div>
-  )
+        </div>
+    )
 }
 
 export default FooterComponent
