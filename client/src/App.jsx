@@ -8,6 +8,7 @@ import InterviewForm from './pages/InterviewForm';
 import ResultPage from './pages/ResultPage';
 import AdminDashboard from './pages/AdminDashboard';
 import { AlertProvider } from './context/AlertContext';
+import AIChatBox from './components/ChatBox';
 import UserDashboard from './pages/UserDashboard';
 import CoachDashboard from './pages/CoachDashboard';
 
@@ -24,7 +25,7 @@ function App() {
           <Route path="/interview" element={<InterviewForm />} />
           <Route path="/results/:id" element={<ResultPage />} />
           <Route path="/admin" element={<AdminDashboard />} />
-
+          <Route path="/chat/session/:id" element={<AIChatBox />} />
         </Routes>
       </AuthProvider>
     </AlertProvider>

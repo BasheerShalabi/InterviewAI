@@ -55,31 +55,40 @@ module.exports.sendMessage = async (req, res) => {
         if (!session) return res.status(404).json({ error: 'Session not found' });
         if (session.isComplete) return res.status(400).json({ error: 'Session already completed' });
 
-        session.messages.push({ role: 'user', content });
-
-        const assistantMessagesCount = session.messages.filter(m => m.role === 'assistant').length;
-
-        if (assistantMessagesCount < session.numQuestions) {
-
-            const prompt = `
-            You are a senior HR interviewer at a top-tier tech company. Your task is to conduct a realistic mock interview with a candidate.
+        const prompt = `
+           You are acting as a professional interviewer. You will behave like a real person conducting a job interview — asking one question at a time based on the user's CV and responses. Do NOT ask all the questions at once. Begin by greeting the candidate and asking the first question only. Then wait for their response before continuing. Each new message should contain only the next appropriate question and nothing more.
 
             Below is the candidate’s raw CV text, extracted from a PDF:
             <CV>
             ${session.raw}
             </CV>
 
-            Conduct a ${session.type} interview (choose from: technical, behavioral, hybrid). Ask the candidate ${session.numQuestions} thoughtful and relevant interview questions **one at a time**.
-
-            After each question, wait for the candidate’s answer before continuing to the next. Do not rush. Make the questions personalized based on the CV where possible.
-
-            Keep your tone professional and supportive, but simulate a real interview scenario. Vary your questions appropriately for the interview type
-
-            Start with a brief introduction, then begin the interview.
-
-            Important: Stay in character as the interviewer and maintain the back-and-forth format until the interview ends.
+            Conduct a ${session.type} interview . Ask the candidate ${session.numQuestions} thoughtful and relevant interview questions one at a time.
                         
             `
+
+        if(session.messages.length === 0 && content.trim() === 'start' && !session.inProgress) {
+
+            const aiStart = [
+                { role: 'system', content: prompt },
+                { role: 'user', content: 'lets start' },
+            ];
+
+            const aiResponse = await callAiModel(aiStart);
+
+            session.messages.push({ role: 'assistant', content: aiResponse });
+            session.inProgress = true;
+
+            await session.save();
+
+            return res.json({ done: false, content: aiResponse });
+        }
+
+        session.messages.push({ role: 'user', content });
+
+        const assistantMessagesCount = session.messages.filter(m => m.role === 'assistant').length;
+
+        if (assistantMessagesCount < session.numQuestions) {
 
             const aiInputMessages = [
                 { role: 'system', content: prompt },
@@ -91,10 +100,8 @@ module.exports.sendMessage = async (req, res) => {
             session.messages.push({ role: 'assistant', content: aiResponse });
             await session.save();
 
-            return res.json({ done: false, aiMessage: aiResponse });
+            return res.json({ done: false, content: aiResponse });
         } else {
-
-            session.messages.push({ role: 'user', content: 'That was my last answer. Please provide detailed feedback, a summary, and a score from 1 to 10.' });
 
             const aiInputMessages = [
                 {
@@ -118,6 +125,7 @@ module.exports.sendMessage = async (req, res) => {
                             }
                             }` }, 
                 ...session.messages,
+                { role: 'user', content: 'That was my last answer. Please provide detailed feedback, a summary, and a score from 1 to 10.' }
             ];
 
             const aiFinalResponse = await callAiModel(aiInputMessages);
@@ -131,7 +139,8 @@ module.exports.sendMessage = async (req, res) => {
             session.overallScore = parsed.overallScore;
             session.finalReview = parsed.finalReview;
             session.isComplete = true;
-            session.messages.push({ role: 'assistant', content: aiFinalResponse });
+            session.inProgress = false;
+            // session.messages.push({ role: 'assistant', content: aiFinalResponse });
 
             await session.save();
 
@@ -142,3 +151,6 @@ module.exports.sendMessage = async (req, res) => {
         return res.status(500).json({ error: 'Server error' });
     }
 };
+
+
+

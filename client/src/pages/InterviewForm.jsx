@@ -4,8 +4,10 @@ import { Upload, FileText, User, Briefcase, Clock, ArrowRight, CheckCircle } fro
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import FooterComponent from '../components/FooterComponent';
+import { useNavigate } from 'react-router-dom';
 
 export default function InterviewForm() {
+    const redirect = useNavigate()
     const [step, setStep] = useState(1);
     const [formData, setFormData] = useState({
         candidateName: '',
@@ -15,10 +17,12 @@ export default function InterviewForm() {
         skills: [],
         cvFile: null,
         interviewType: 'technical',
-        duration: '60'
+        duration: 0
     });
     const [cvAnalysis, setCvAnalysis] = useState(null);
     const [loading, setLoading] = useState(false);
+
+    const token = localStorage.getItem("session");
 
     const { user } = useAuth();
 
@@ -65,9 +69,23 @@ export default function InterviewForm() {
         }, 2000);
     };
 
-    const startInterview = () => {
-        // Navigate to interview session
-        console.log('Starting interview with data:', formData);
+    const startInterview = async () => {
+        try {
+            const res = await axios({ method: 'post', url: 'http://localhost:8000/api/sessions',
+                headers: { Authorization: `Bearer ${token}` } , data:{
+                raw: formData.raw,
+                numQuestions : formData.duration,
+                type: formData.interviewType,
+            } 
+        })
+                const session =  res.data;
+                console.log("Session created:", session);
+                redirect(`/chat/session/${session._id}`);
+            
+        } catch (err) {
+            console.error("Error creating session:", err);
+        }
+    
     };
 
     return (
@@ -371,8 +389,8 @@ export default function InterviewForm() {
                                         className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all duration-300 bg-white/50 backdrop-blur-sm"
                                     >
                                         <option value="technical">Technical Interview</option>
-                                        <option value="behavioral">Behavioral Interview</option>
-                                        <option value="mixed">Mixed Interview</option>
+                                        <option value="behavioural">Behavioral Interview</option>
+                                        <option value="hybrid">Mixed Interview</option>
                                     </select>
                                 </div>
 
@@ -388,10 +406,10 @@ export default function InterviewForm() {
                                             onChange={handleInputChange}
                                             className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all duration-300 bg-white/50 backdrop-blur-sm"
                                         >
-                                            <option value="30">30 minutes</option>
-                                            <option value="45">45 minutes</option>
-                                            <option value="60">60 minutes</option>
-                                            <option value="90">90 minutes</option>
+                                            <option value="5">30 minutes</option>
+                                            <option value="7">45 minutes</option>
+                                            <option value="9">60 minutes</option>
+                                            <option value="10">90 minutes</option>
                                         </select>
                                     </div>
                                 </div>
