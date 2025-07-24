@@ -5,6 +5,8 @@ import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import FooterComponent from '../components/FooterComponent';
 import { useNavigate } from 'react-router-dom';
+import HeaderComponent from '../components/HeaderComponent';
+import { use } from 'react';
 
 export default function InterviewForm() {
     const redirect = useNavigate()
@@ -21,7 +23,7 @@ export default function InterviewForm() {
     });
     const [cvAnalysis, setCvAnalysis] = useState(null);
     const [loading, setLoading] = useState(false);
-
+    const {  logout}= useAuth();
     const token = localStorage.getItem("session");
 
     const { user } = useAuth();
@@ -90,6 +92,7 @@ export default function InterviewForm() {
 
     return (
         <>
+        <HeaderComponent user={user} logout={logout}/>
         
         
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-6">
