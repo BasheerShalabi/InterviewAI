@@ -40,6 +40,7 @@ export default function Login() {
             if (response.ok) {
                 const data = await response.json();
                 login(data.token);
+                console.log("UserToken logged in:", data.token);
                 navigate('/interview');
             }
     

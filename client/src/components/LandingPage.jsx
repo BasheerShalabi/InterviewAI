@@ -58,7 +58,7 @@ export default function LandingPage() {
 
 
             {/* Header */}
-            <HeaderComponent user={user} logout={logout}/>
+            <HeaderComponent user={user} logout={logout} />
 
 
             {/* Hero Section */}
@@ -992,6 +992,6 @@ export default function LandingPage() {
 
             {/* Footer */}
             <FooterComponent />
-       </div>
+        </div>
     );
 }
