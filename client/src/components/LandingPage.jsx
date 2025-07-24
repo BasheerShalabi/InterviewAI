@@ -980,13 +980,24 @@ export default function LandingPage() {
                     <p className="text-xl text-slate-200 mb-10 leading-relaxed">
                         Combine CV analysis with live interviews for smarter hiring decisions
                     </p>
-                    <Link
-                        to="/register"
-                        className="group bg-white text-slate-700 px-10 py-4 rounded-xl font-semibold hover:bg-slate-50 transition-all duration-300 inline-flex items-center gap-2 shadow-lg hover:shadow-xl hover:scale-105"
-                    >
+                    {user !== null ? (
+                        <Link
+                            to="/interview"
+                            className="bg-gradient-to-r from-slate-500 to-slate-600 text-white px-10 py-4 rounded-xl font-semibold hover:from-slate-600 hover:to-slate-700 transition-all duration-300 inline-flex items-center gap-2 shadow-lg hover:shadow-xl hover:scale-105"
+                        >
                         Try CV Analysis Free
-                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
-                    </Link>
+                            <ArrowRight className="w-5 h-5" />
+                        </Link>
+                    ) : (
+                        <Link
+                            to="/register"
+                            className="bg-gradient-to-r from-slate-500 to-slate-600 text-white px-10 py-4 rounded-xl font-semibold hover:from-slate-600 hover:to-slate-700 transition-all duration-300 inline-flex items-center gap-2 shadow-lg hover:shadow-xl hover:scale-105"
+                        >
+                        Try CV Analysis Free
+                            <ArrowRight className="w-5 h-5" />
+                        </Link>
+                    )}
+                  
                 </motion.div>
             </section>
 
