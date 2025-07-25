@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { Send } from "lucide-react"; // icon for send button
+import { Eye, Send } from "lucide-react"; // icon for send button
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import axios from "axios";
 import { useAlert } from "../context/AlertContext";
+import { Link } from "react-router-dom";
 
 export default function AIChatBox() {
+    const [session , setSession] = useState({})
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState("");
     const messagesEndRef = useRef(null);
@@ -29,6 +31,7 @@ export default function AIChatBox() {
             })
 
             const session = res.data;
+            setSession(session)
             setMessages(session.messages);
             console.log("Session fetched:", session);
             showAlert("Session loaded successfully", "success");
@@ -180,17 +183,21 @@ export default function AIChatBox() {
             </motion.div>
 
             {/* Input box */}
+
             <motion.div
                 className="mt-6 flex items-center gap-4"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
             >
+                {!session.isComplete ? 
+                
+                (<>
                 <textarea
                     rows={1}
                     ref={textareaRef}
                     placeholder="Type your message..."
                     className="flex-grow rounded-2xl border border-slate-300 px-6 py-3 text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 backdrop-blur-sm bg-white/70 max-h-48 overflow-y-hidden resize-none scrollbar-none" value={input}
-                    disabled={sending}
+                    disabled={sending || session.isComplete}
                     onChange={(e) => {
                         setInput(e.target.value)
                         if (textareaRef.current) {
@@ -202,7 +209,7 @@ export default function AIChatBox() {
                 />
                 <motion.button
                     onClick={sendMessage}
-                    disabled={!input.trim() || sending}
+                    disabled={!input.trim() || sending || session.isComplete}
                     className="rounded-full bg-gradient-to-r from-indigo-600 to-indigo-700 p-3 text-white shadow-lg hover:from-indigo-700 hover:to-indigo-800 disabled:opacity-50 disabled:cursor-not-allowed"
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
@@ -210,6 +217,16 @@ export default function AIChatBox() {
                 >
                     <Send size={20} />
                 </motion.button>
+                </>
+            ):(
+                <div className="mt-4 text-right">
+                    <Link to={`/results/${session._id}`} className="inline-flex items-center gap-2 px-4 py-2 bg-slate-700 text-white rounded-xl hover:bg-slate-800 transition-all duration-300 text-sm">
+                        <Eye className="w-4 h-4" />
+                            View Results
+                    </Link>
+                </div>
+                )
+            }
             </motion.div>
         </div>
     );

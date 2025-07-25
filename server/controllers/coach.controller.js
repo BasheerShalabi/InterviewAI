@@ -32,14 +32,10 @@ module.exports.requestCoach = async (req, res) => {
             runValidators: true
         });        
 
-        // إعادة إصدار توكن محدث مع معلومات جديدة (إن أردت تحديثها في الواجهة)
-        const token = jwt.sign(
-            { id: user._id, role: user.role, fullname: user.fullname },
-            process.env.JWT_SECRET,
-            { expiresIn: '1h' }
-        );
+     
+        
 
-        res.json({ message: "Coach request sent.", token });
+        res.json({ message: "Coach request sent."});
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Server error while sending coach request." });
@@ -68,7 +64,8 @@ module.exports.respondToCoachRequest = async (req, res) => {
         if (accept) {
             await User.findByIdAndUpdate(user._id, {pendingCoachRequest:null, assignedCoachId:req.user.id}, {
                 runValidators: true
-            });        
+            });      
+
             return res.json({ message: "Request accepted." });
         } else {
             await User.findByIdAndUpdate(user._id, {pendingCoachRequest:null}, {

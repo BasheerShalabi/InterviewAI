@@ -21,16 +21,30 @@ export const AuthProvider = ({ children }) => {
 
     useEffect(() => {
         const token = localStorage.getItem("session");
-        if (token) {
-            try {
-                const decodedUser = jwtDecode(token);
+    if (token) {
+        try {
+            const decodedUser = jwtDecode(token);
+            const currentTime = Date.now() / 1000;
+
+            if (decodedUser.exp && decodedUser.exp < currentTime) {
+                console.log("Token expired");
+                localStorage.removeItem("session");
+                setUser(null);
+                showAlert("Session expired. Please log in again.", "warning");
+                redirect("/login");
+            } else {
                 setUser(decodedUser);
                 console.log("User logged in:", decodedUser);
-            } catch (err) {
-                console.error("Invalid token:", err);
             }
+        } catch (err) {
+            console.error("Invalid token:", err);
+            localStorage.removeItem("session");
+            setUser(null);
+            showAlert("Invalid session token. Please log in again.", "error");
+            redirect("/login");
         }
-        setLoading(false);
+    }
+    setLoading(false);
     }, []);
 
     const logout = () => {
