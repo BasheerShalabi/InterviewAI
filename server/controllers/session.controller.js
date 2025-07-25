@@ -1,6 +1,7 @@
 const Session = require('../models/session.model');
 const callAiModel = require('../utils/ai');
 const parseAiFeedback = require('../utils/parser');
+const {cleanQuestion} = require('../utils/responseCleaner')
 
 module.exports.createSession = async (req, res) => {
     try {
@@ -58,6 +59,7 @@ module.exports.sendMessage = async (req, res) => {
         const prompt = `
            You are acting as a professional interviewer. You will behave like a real person conducting a job interview — asking one question at a time based on the user's CV and responses. Do NOT ask all the questions at once. Begin by greeting the candidate and asking the first question only. Then wait for their response before continuing. Each new message should contain only the next appropriate question and nothing more.
 
+
             Below is the candidate’s raw CV text, extracted from a PDF:
             <CV>
             ${session.raw}
@@ -76,12 +78,14 @@ module.exports.sendMessage = async (req, res) => {
 
             const aiResponse = await callAiModel(aiStart);
 
-            session.messages.push({ role: 'assistant', content: aiResponse });
+            const cleaned = cleanQuestion(aiResponse)
+
+            session.messages.push({ role: 'assistant', content: cleaned });
             session.inProgress = true;
 
             await session.save();
 
-            return res.json({ done: false, content: aiResponse });
+            return res.json({ done: false, content: cleaned });
         }
 
         session.messages.push({ role: 'user', content });
@@ -97,10 +101,12 @@ module.exports.sendMessage = async (req, res) => {
 
             const aiResponse = await callAiModel(aiInputMessages);
 
-            session.messages.push({ role: 'assistant', content: aiResponse });
+            const cleaned = cleanQuestion(aiResponse)
+
+            session.messages.push({ role: 'assistant', content: cleaned });
             await session.save();
 
-            return res.json({ done: false, content: aiResponse });
+            return res.json({ done: false, content: cleaned });
         } else {
 
             const aiInputMessages = [
