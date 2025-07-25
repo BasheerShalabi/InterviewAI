@@ -1,4 +1,5 @@
 const Session = require('../models/session.model');
+const User = require('../models/user.model')
 const callAiModel = require('../utils/ai');
 const parseAiFeedback = require('../utils/parser');
 const {cleanQuestion} = require('../utils/responseCleaner')
@@ -8,8 +9,13 @@ module.exports.createSession = async (req, res) => {
         const { raw, numQuestions , type } = req.body;
         const userId = req.user.id;
 
+        const fetchedUser = await User.findOne({ userId })
+
+        const userName = fetchedUser.fullname
+
         const newSession = await Session.create({
             userId,
+            userName,
             raw,
             type,
             messages: [],
