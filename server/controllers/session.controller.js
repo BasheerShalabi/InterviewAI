@@ -40,10 +40,19 @@ module.exports.getMySessions = async (req, res) => {
 
 module.exports.getSessionById = async (req, res) => {
     try {
-        const session = await Session.findOne({ _id: req.params.id, userId: req.user.id });
-        if (!session) return res.status(404).json({ error: "Session not found" });
+        const session = await Session.findById(req.params.id);
+    if (!session) return res.status(404).json({ error: "Session not found" });
 
-        res.json(session);
+    if (session.userId.toString() === req.user.id) {
+        return res.json(session);
+    }
+
+    const sessionOwner = await User.findById(session.userId);
+    if (sessionOwner && sessionOwner.assignedCoachId?.toString() === req.user.id) {
+        return res.json(session);
+    }
+
+    return res.status(403).json({ error: "Access denied" });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
