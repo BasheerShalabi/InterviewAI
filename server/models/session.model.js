@@ -6,6 +6,10 @@ const SessionSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
+  userName:{
+    type: String,
+    required:true
+  },
   raw: {
     type: String,
     required: true,
