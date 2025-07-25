@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { BotIcon, Code, Users, Clock, CheckCircle, Play, ArrowRight, FileText, Upload, Brain } from 'lucide-react';
+import { BotIcon, Mic, CheckCircle, ArrowRight, FileText, Upload, Brain } from 'lucide-react';
 import { motion } from 'framer-motion';
 import HeaderComponent from './HeaderComponent';
 import { useAuth } from '../context/AuthContext';
@@ -80,7 +80,7 @@ export default function LandingPage() {
                             </span>
                             <br />
                             <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                                Technical Interviews
+                                Interviews
                             </span>
                         </motion.h1>
 
@@ -90,7 +90,7 @@ export default function LandingPage() {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.8, delay: 0.4 }}
                         >
-                            Conduct fair, efficient technical interviews with real-time AI analysis and automated scoring in a calm, professional environment.
+                            Conduct fair, efficient interviews with real-time AI analysis and automated scoring in a calm, professional environment.
                         </motion.p>
 
                         <motion.div
@@ -106,10 +106,6 @@ export default function LandingPage() {
                                 Start Interview
                                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
                             </Link>
-                            <button className="group flex items-center justify-center gap-2 px-8 py-4 border-2 border-slate-300 rounded-xl hover:bg-slate-50 hover:border-slate-400 transition-all duration-300 hover:scale-105 backdrop-blur-sm">
-                                <Play className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
-                                Watch Demo
-                            </button>
                         </motion.div>
 
                         <motion.div
@@ -134,166 +130,151 @@ export default function LandingPage() {
                     </motion.div>
 
                     <motion.div
-                        className="relative"
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: 0.4, duration: 0.8 }}
+    className="relative"
+    initial={{ opacity: 0, scale: 0.9 }}
+    animate={{ opacity: 1, scale: 1 }}
+    transition={{ delay: 0.4, duration: 0.8 }}
+>
+    <div className="relative bg-white/70  rounded-2xl p-8 shadow-2xl border border-white/20 hover:shadow-3xl transition-all duration-500 hover:scale-105">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 rounded-2xl"></div>
+
+        <div className="relative">
+            <div className="flex items-center gap-2 mb-6">
+                <div className="w-3 h-3 bg-red-400 rounded-full animate-pulse"></div>
+                <div className="w-3 h-3 bg-yellow-400 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+                <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
+                <span className="text-slate-500 text-sm ml-4 font-medium">Interview Chat</span>
+                <motion.div
+                    className="ml-auto flex items-center gap-2 text-xs text-slate-400"
+                    animate={{ opacity: [0.5, 1, 0.5] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                >
+                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                    Live AI Chat
+                </motion.div>
+            </div>
+
+            {/* Chat Bubbles */}
+            <div className="space-y-4 text-sm bg-white/70 rounded-lg p-4 relative overflow-hidden">
+                <motion.div
+                    className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-blue-400 to-transparent"
+                    animate={{ x: [-100, 300] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                />
+
+                <motion.div
+                    className="bg-slate-100 text-slate-800 p-3 rounded-xl max-w-xs"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.5 }}
+                >
+                    AI: Tell me about a time you faced a major challenge at work.
+                </motion.div>
+
+                <motion.div
+                    className="bg-blue-100 text-blue-800 p-3 rounded-xl max-w-xs ml-auto"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.8 }}
+                >
+                    Sure, during a product launch, our backend system went down hours before release...
+                </motion.div>
+
+                <motion.div
+                    className="bg-slate-100 text-slate-800 p-3 rounded-xl max-w-xs"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 1.2 }}
+                >
+                    AI: And how did you handle the pressure in that situation?
+                </motion.div>
+
+                <motion.div
+                    className="absolute bottom-2 right-2 text-xs text-slate-400 flex items-center gap-1"
+                    animate={{ opacity: [0.3, 1, 0.3] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                >
+                    <div className="w-1 h-1 bg-green-400 rounded-full animate-ping"></div>
+                    Typing...
+                </motion.div>
+            </div>
+
+            {/* AI Analysis */}
+            <motion.div
+                className="mt-6 p-4 bg-gradient-to-r from-teal-50 to-cyan-50 rounded-xl border border-teal-200/50 relative overflow-hidden"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.5, duration: 0.6 }}
+            >
+                <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                    animate={{ x: [-100, 400] }}
+                    transition={{ duration: 2, repeat: Infinity, delay: 2 }}
+                />
+
+                <div className="flex items-center gap-2 text-teal-700 text-sm mb-2 font-medium">
+                    <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                     >
-                        <div className="relative bg-white/70 backdrop-blur-xl rounded-2xl p-8 shadow-2xl border border-white/20 hover:shadow-3xl transition-all duration-500 hover:scale-105">
-                            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 rounded-2xl"></div>
-
-                            <div className="relative">
-                                <div className="flex items-center gap-2 mb-6">
-                                    <div className="w-3 h-3 bg-red-400 rounded-full animate-pulse"></div>
-                                    <div className="w-3 h-3 bg-yellow-400 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
-                                    <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
-                                    <span className="text-slate-500 text-sm ml-4 font-medium">Interview Session</span>
-                                    <motion.div
-                                        className="ml-auto flex items-center gap-2 text-xs text-slate-400"
-                                        animate={{ opacity: [0.5, 1, 0.5] }}
-                                        transition={{ duration: 2, repeat: Infinity }}
-                                    >
-                                        <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                                        Live Recording
-                                    </motion.div>
-                                </div>
-
-                                <div className="space-y-3 text-sm font-mono bg-slate-900/90 backdrop-blur-sm rounded-lg p-4 relative overflow-hidden">
-                                    <motion.div
-                                        className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-blue-400 to-transparent"
-                                        animate={{ x: [-100, 300] }}
-                                        transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                                    />
-
-                                    <motion.div
-                                        className="text-purple-300"
-                                        initial={{ opacity: 0, x: -20 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: 0.5 }}
-                                    >
-                                        class <span className="text-blue-300">TreeNode</span><span className="text-white">:</span>
-                                    </motion.div>
-
-                                    <motion.div
-                                        className="text-white pl-4"
-                                        initial={{ opacity: 0, x: -20 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: 0.7 }}
-                                    >
-                                        def __init__(self, val=0):
-                                    </motion.div>
-
-                                    <motion.div
-                                        className="text-white pl-8"
-                                        initial={{ opacity: 0, x: -20 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: 0.9 }}
-                                    >
-                                        self.val = val
-                                    </motion.div>
-
-                                    <motion.div
-                                        className="text-white pl-8"
-                                        initial={{ opacity: 0, x: -20 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: 1.1 }}
-                                    >
-                                        self.left = self.right = None
-                                    </motion.div>
-
-                                    <motion.div
-                                        className="text-teal-300 pl-4"
-                                        initial={{ opacity: 0, scale: 0.8 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        transition={{ delay: 1.5, type: "spring" }}
-                                    >
-                                        # AI: Great data structure choice!
-                                    </motion.div>
-
-                                    <motion.div
-                                        className="absolute bottom-2 right-2 text-xs text-slate-400 flex items-center gap-1"
-                                        animate={{ opacity: [0.3, 1, 0.3] }}
-                                        transition={{ duration: 1.5, repeat: Infinity }}
-                                    >
-                                        <div className="w-1 h-1 bg-green-400 rounded-full animate-ping"></div>
-                                        Typing...
-                                    </motion.div>
-                                </div>
-
-                                <motion.div
-                                    className="mt-6 p-4 bg-gradient-to-r from-teal-50 to-cyan-50 rounded-xl border border-teal-200/50 relative overflow-hidden"
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: 1, duration: 0.6 }}
-                                >
-                                    <motion.div
-                                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                                        animate={{ x: [-100, 400] }}
-                                        transition={{ duration: 2, repeat: Infinity, delay: 2 }}
-                                    />
-
-                                    <div className="flex items-center gap-2 text-teal-700 text-sm mb-2 font-medium">
-                                        <motion.div
-                                            animate={{ rotate: 360 }}
-                                            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                                        >
-                                            <CheckCircle className="w-4 h-4" />
-                                        </motion.div>
-                                        AI Analysis Complete
-                                    </div>
-                                    <div className="text-xs text-teal-600 space-y-1 relative">
-                                        <motion.div
-                                            initial={{ opacity: 0, x: -10 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            transition={{ delay: 1.2 }}
-                                        >
-                                            Object-Oriented Design: Excellent ✓
-                                        </motion.div>
-                                        <motion.div
-                                            initial={{ opacity: 0, x: -10 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            transition={{ delay: 1.4 }}
-                                        >
-                                            Code Structure: Clean & Readable ✓
-                                        </motion.div>
-                                        <motion.div
-                                            initial={{ opacity: 0, x: -10 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            transition={{ delay: 1.6 }}
-                                        >
-                                            Problem Solving: Advanced Level ✓
-                                        </motion.div>
-
-                                        <motion.div
-                                            className="mt-2 flex items-center gap-2"
-                                            initial={{ opacity: 0, scale: 0.8 }}
-                                            animate={{ opacity: 1, scale: 1 }}
-                                            transition={{ delay: 1.8, type: "spring" }}
-                                        >
-                                            <div className="text-xs font-medium text-teal-700">Score:</div>
-                                            <div className="flex gap-1">
-                                                {[1, 2, 3, 4, 5].map((star, i) => (
-                                                    <motion.div
-                                                        key={star}
-                                                        className="w-3 h-3 bg-yellow-400 rounded-full"
-                                                        initial={{ scale: 0 }}
-                                                        animate={{ scale: 1 }}
-                                                        transition={{ delay: 2 + i * 0.1, type: "spring" }}
-                                                    />
-                                                ))}
-                                            </div>
-                                            <span className="text-xs font-bold text-teal-700">95/100</span>
-                                        </motion.div>
-                                    </div>
-                                </motion.div>
-                            </div>
-                        </div>
+                        <CheckCircle className="w-4 h-4" />
                     </motion.div>
+                    AI Analysis Complete
+                </div>
+                <div className="text-xs text-teal-600 space-y-1 relative">
+                    <motion.div
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 1.6 }}
+                    >
+                        Communication: Clear & Concise ✓
+                    </motion.div>
+                    <motion.div
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 1.8 }}
+                    >
+                        Stress Handling: Strong ✓
+                    </motion.div>
+                    <motion.div
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 2.0 }}
+                    >
+                        Leadership Traits: Evident ✓
+                    </motion.div>
+
+                    <motion.div
+                        className="mt-2 flex items-center gap-2"
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 2.2, type: "spring" }}
+                    >
+                        <div className="text-xs font-medium text-teal-700">Score:</div>
+                        <div className="flex gap-1">
+                            {[1, 2, 3, 4, 5].map((star, i) => (
+                                <motion.div
+                                    key={star}
+                                    className="w-3 h-3 bg-yellow-400 rounded-full"
+                                    initial={{ scale: 0 }}
+                                    animate={{ scale: 1 }}
+                                    transition={{ delay: 2.4 + i * 0.1, type: "spring" }}
+                                />
+                            ))}
+                        </div>
+                        <span className="text-xs font-bold text-teal-700">92/100</span>
+                    </motion.div>
+                </div>
+            </motion.div>
+        </div>
+    </div>
+</motion.div>
+
                 </div>
             </section>
 
             {/* Features */}
-            <section className="bg-white/50 backdrop-blur-sm py-20 relative">
+            <section className="bg-white/50  py-20 relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-50/30 to-indigo-50/30"></div>
                 <div className="max-w-6xl mx-auto px-6 relative">
                     <motion.div
@@ -309,16 +290,16 @@ export default function LandingPage() {
                             </span>
                         </h2>
                         <p className="text-lg text-slate-600">
-                            Everything you need to conduct professional technical interviews
+                            Everything you need to conduct professional interviews
                         </p>
                     </motion.div>
 
                     <div className="grid md:grid-cols-3 gap-8">
                         {[
                             {
-                                icon: Code,
-                                title: "Live Code Editor",
-                                description: "Real-time collaborative coding environment with syntax highlighting and AI-powered suggestions.",
+                                icon: Mic,
+                                title: "Mock Interview Practice",
+                                description: "Simulated interview sessions with AI-generated questions and instant feedback to help you improve.",
                                 gradient: "from-blue-500 to-cyan-500"
                             },
                             {
@@ -330,13 +311,13 @@ export default function LandingPage() {
                             {
                                 icon: BotIcon,
                                 title: "AI Evaluation",
-                                description: "Comprehensive evaluation combining CV analysis with live coding performance and behavioral assessment.",
+                                description: "Comprehensive evaluation combining CV analysis with live behavioral assessment.",
                                 gradient: "from-purple-500 to-pink-500"
                             }
                         ].map((feature, index) => (
                             <motion.div
                                 key={index}
-                                className="group bg-white/70 backdrop-blur-xl p-8 rounded-2xl shadow-lg border border-white/20 hover:shadow-2xl transition-all duration-500 hover:scale-105"
+                                className="group bg-white/70  p-8 rounded-2xl shadow-lg border border-white/20 hover:shadow-2xl transition-all duration-500 hover:scale-105"
                                 initial={{ opacity: 0, y: 30 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.6, delay: index * 0.1 }}
@@ -389,7 +370,7 @@ export default function LandingPage() {
                                 <div className="flex items-start gap-4">
                                     <motion.div
                                         className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg relative overflow-hidden"
-                                        whileHover={{ scale: 1.1, rotate: 5 }}
+                                        whileHover={{ rotate: 5 }}
                                         animate={{
                                             boxShadow: [
                                                 "0 4px 20px rgba(59, 130, 246, 0.3)",
@@ -429,7 +410,7 @@ export default function LandingPage() {
                                         transition={{ type: "spring", stiffness: 300 }}
                                     >
                                         <h3 className="text-xl font-semibold text-slate-800 mb-2">Smart Upload & Parse</h3>
-                                        <p className="text-slate-600">Automatically extract and structure information from any CV format including PDF, DOC, and plain text.</p>
+                                        <p className="text-slate-600">Automatically extract and structure information from any CV PDF.</p>
                                     </motion.div>
                                 </div>
 
@@ -545,7 +526,7 @@ export default function LandingPage() {
                             viewport={{ once: true }}
                         >
                             <motion.div
-                                className="relative bg-white/70 backdrop-blur-xl rounded-2xl p-8 shadow-2xl border border-white/20 hover:shadow-3xl transition-all duration-500 overflow-hidden"
+                                className="relative bg-white/70  rounded-2xl p-8 shadow-2xl border border-white/20 hover:shadow-3xl transition-all duration-500 overflow-hidden"
                                 whileHover={{ scale: 1.02, rotateY: 2 }}
                                 animate={{
                                     boxShadow: [
@@ -690,7 +671,7 @@ export default function LandingPage() {
 
                                     <div className="space-y-4">
                                         <motion.div
-                                            className="bg-slate-50/80 backdrop-blur-sm rounded-lg p-4 border border-slate-200/50 hover:border-green-300/50 transition-all duration-300 relative overflow-hidden"
+                                            className="bg-slate-50/80  rounded-lg p-4 border border-slate-200/50 hover:border-green-300/50 transition-all duration-300 relative overflow-hidden"
                                             initial={{ opacity: 0, y: 10 }}
                                             animate={{ opacity: 1, y: 0 }}
                                             transition={{ delay: 0.5 }}
@@ -706,7 +687,7 @@ export default function LandingPage() {
                                             />
 
                                             <div className="flex items-center justify-between mb-2">
-                                                <span className="text-sm font-medium text-slate-700">Technical Skills Match</span>
+                                                <span className="text-sm font-medium text-slate-700">Skills Match</span>
                                                 <motion.span
                                                     className="text-sm font-bold text-green-600"
                                                     animate={{
@@ -752,7 +733,7 @@ export default function LandingPage() {
                                         </motion.div>
 
                                         <motion.div
-                                            className="bg-slate-50/80 backdrop-blur-sm rounded-lg p-4 border border-slate-200/50 hover:border-blue-300/50 transition-all duration-300 relative overflow-hidden"
+                                            className="bg-slate-50/80  rounded-lg p-4 border border-slate-200/50 hover:border-blue-300/50 transition-all duration-300 relative overflow-hidden"
                                             initial={{ opacity: 0, y: 10 }}
                                             animate={{ opacity: 1, y: 0 }}
                                             transition={{ delay: 0.8 }}
@@ -931,7 +912,7 @@ export default function LandingPage() {
                             {
                                 step: "3",
                                 title: "Conduct Interview",
-                                description: "Live coding session with real-time AI evaluation and feedback",
+                                description: "Live session with real-time AI evaluation and feedback",
                                 gradient: "from-purple-500 to-pink-500"
                             },
                             {
