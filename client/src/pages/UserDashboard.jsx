@@ -6,6 +6,7 @@ import {
     Clock,
     CheckCircle,
     FileText,
+    ClipboardPenLine,
     Star,
     Eye,
     MessageCircle,
@@ -205,7 +206,6 @@ export default function UserDashboard() {
         setFeedbackModal(null);
     };
 
-    // Calculate average rating from coach feedback
     const getAverageRating = () => {
         if (coachFeedback.length === 0) return 0;
         const validRatings = coachFeedback.filter(feedback => feedback.rating > 0);
@@ -215,7 +215,6 @@ export default function UserDashboard() {
         return (total / validRatings.length).toFixed(1);
     };
 
-    // Get feedback for a specific interview
     const getFeedbackForInterview = (interviewId) => {
         return coachFeedback.find(feedback => feedback.interviewId === interviewId);
     };
@@ -225,7 +224,7 @@ export default function UserDashboard() {
         
         return (
             <motion.div
-                key={session.id}
+                key={index}
                 className="bg-white/80 backdrop-blur-xl shadow-xl rounded-2xl p-6 border border-white/20"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -315,12 +314,22 @@ export default function UserDashboard() {
                     </div>
                 )}
 
+                {session.inProgress && !session.isComplete ? (
+                    <div className="mt-4 text-right">
+                    <Link to={`/chat/session/${session._id}`} className="inline-flex items-center gap-2 px-4 py-2 bg-slate-700 text-white rounded-xl hover:bg-slate-800 transition-all duration-300 text-sm">
+                        <ClipboardPenLine className="w-4 h-4" />
+                        Resume Interview
+                    </Link>
+                </div>
+                ) : (
+
                 <div className="mt-4 text-right">
                     <Link to={`/chat/session/${session._id}`} className="inline-flex items-center gap-2 px-4 py-2 bg-slate-700 text-white rounded-xl hover:bg-slate-800 transition-all duration-300 text-sm">
                         <Eye className="w-4 h-4" />
                         View Details
                     </Link>
                 </div>
+                )}
             </motion.div>
         );
     });

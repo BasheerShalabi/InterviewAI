@@ -328,7 +328,7 @@ export default function InterviewForm() {
 
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        Duration (minutes)
+                                        Nubmer of Questions
                                     </label>
                                     <div className="relative">
                                         <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
@@ -338,10 +338,12 @@ export default function InterviewForm() {
                                             onChange={handleInputChange}
                                             className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all duration-300 bg-white/50 backdrop-blur-sm"
                                         >
-                                            <option value="5">30 minutes</option>
-                                            <option value="7">45 minutes</option>
-                                            <option value="9">60 minutes</option>
-                                            <option value="10">90 minutes</option>
+                                            <option value="5">5</option>
+                                            <option value="6">6</option>
+                                            <option value="7">7</option>
+                                            <option value="8">8</option>
+                                            <option value="9">9</option>
+                                            <option value="10">10</option>
                                         </select>
                                     </div>
                                 </div>

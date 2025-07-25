@@ -16,8 +16,16 @@ function App() {
   return (
         <Routes>
           <Route path="/" element={<LandingPage />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={
+            <ProtectedRoute role={true}>
+            <Login />
+            </ProtectedRoute>
+            } />
+          <Route path="/register" element={
+            <ProtectedRoute role={true}>
+            <Register />
+            </ProtectedRoute>
+            } />
           <Route path="/dashboard" element={
             <ProtectedRoute>
               {user!=null&&(!loading && ( user.role == "user" ? <UserDashboard /> : user.role == "coach" ?  <CoachDashboard /> : <AdminDashboard /> ))}
