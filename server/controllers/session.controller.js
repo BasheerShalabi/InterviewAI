@@ -158,5 +158,15 @@ module.exports.sendMessage = async (req, res) => {
     }
 };
 
-
+module.exports.updateCoachFeedback = async (req, res) =>{
+    try{
+        const feedback = req.body
+        const session = await Session.findByIdAndUpdate(req.params.id, {coachFeedback:feedback});        
+        if (!session) return res.status(404).json({ error: "Session not found" });
+        
+        res.json(session);
+    }catch(err){
+        res.status(500).json({ error: err.message });
+    }
+}
 

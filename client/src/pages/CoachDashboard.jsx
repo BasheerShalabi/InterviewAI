@@ -83,7 +83,7 @@ export default function CoachDashboard() {
 
                 // Fetch completed interviews for feedback
                 console.log("Fetching user sessions...");
-                const resInterviews = await fetch("http://localhost:8000/api/coaches/user-sessions", {
+                const resInterviews = await fetch("http://localhost:8000/api/coaches/assigned-users/sessions", {
                     headers: { 
                         "Authorization": `Bearer ${token}`,
                         "Content-Type": "application/json"
@@ -228,7 +228,7 @@ export default function CoachDashboard() {
         try {
             // Submit feedback to the session/interview
             const response = await fetch(`http://localhost:8000/api/sessions/${feedbackModal.interviewId}/coach-feedback`, {
-                method: "POST",
+                method: "PATCH",
                 headers: {
                     "Authorization": `Bearer ${token}`,
                     "Content-Type": "application/json",

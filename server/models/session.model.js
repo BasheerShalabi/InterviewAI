@@ -64,7 +64,7 @@ const SessionSchema = new mongoose.Schema({
     default: Date.now
   },
   coachFeedback: {
-    type: String,
+    type: Object,
     default: ""
   },
   numQuestions: {

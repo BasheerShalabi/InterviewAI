@@ -20,7 +20,7 @@ import FooterComponent from "../components/FooterComponent";
 import { Link } from "react-router-dom";
 
 export default function UserDashboard() {
-    const { user, logout, setUser } = useAuth();
+    const { user, logout } = useAuth();
     const [interviews, setInterviews] = useState([]);
     const [loading, setLoading] = useState(true);
     const [coaches, setCoaches] = useState([]);
@@ -34,36 +34,28 @@ export default function UserDashboard() {
     const [count, setCount] = useState(0);
 
     const fetchUserData = async () => {
-        try {
-            const res = await axios.get("http://localhost:8000/api/user/profile", {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            const updatedUser = res.data;
+        // try {
+        //     const res = await axios.get("http://localhost:8000/api/user/profile", {
+        //         headers: { Authorization: `Bearer ${token}` },
+        //     });
+        //     const updatedUser = res.data;
             
-            if (setUser) {
-                setUser(updatedUser);
-            }
+        //     if (setUser) {
+        //         setUser(updatedUser);
+        //     }
             
-            setCoachRequested(updatedUser?.coachRequestPending || false);
+        //     setCoachRequested(updatedUser?.coachRequestPending || false);
             
-            return updatedUser;
-        } catch (err) {
-            console.error("Error fetching user data:", err);
-            return user;
-        }
+        //     return updatedUser;
+        // } catch (err) {
+        //     console.error("Error fetching user data:", err);
+        //     return user;
+        // }
     };
 
     const fetchCoachFeedback = async () => {
-        try {
-            const res = await fetch("http://localhost:8000/api/user/coach-feedback", {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            const data = await res.json();
-            setCoachFeedback(Array.isArray(data) ? data : []);
-        } catch (err) {
-            console.error("Error fetching coach feedback:", err);
-            setCoachFeedback([]);
-        }
+        setCoachFeedback(interviews.map(i => i.coachFeedback));
+        console.log(coachFeedback)
     };
 
     const fetchCoaches = async () => {
@@ -87,27 +79,27 @@ export default function UserDashboard() {
         }
     };
 
-    const checkForCoachAcceptance = async () => {
-        if (coachRequested && !user?.coachId) {
-            try {
-                const updatedUser = await fetchUserData();
+    // const checkForCoachAcceptance = async () => {
+    //     if (coachRequested && !user?.coachId) {
+    //         try {
+    //             const updatedUser = await fetchUserData();
                 
-                if (updatedUser && updatedUser.coachId && !updatedUser.requestId) {
-                    setCoachRequested(false);
+    //             if (updatedUser && updatedUser.coachId && !updatedUser.requestId) {
+    //                 setCoachRequested(false);
                     
-                    if (coaches.length > 0) {
-                        const userCoachId = typeof updatedUser.coachId === "object" ? updatedUser.coachId._id : updatedUser.coachId;
-                        const coachObj = coaches.find((c) => c.id === userCoachId);
-                        if (coachObj) {
-                            setCurrentCoach(coachObj.name);
-                        }
-                    }
-                }
-            } catch (err) {
-                console.error("Error checking coach acceptance:", err);
-            }
-        }
-    };
+    //                 if (coaches.length > 0) {
+    //                     const userCoachId = typeof updatedUser.coachId === "object" ? updatedUser.coachId._id : updatedUser.coachId;
+    //                     const coachObj = coaches.find((c) => c.id === userCoachId);
+    //                     if (coachObj) {
+    //                         setCurrentCoach(coachObj.name);
+    //                     }
+    //                 }
+    //             }
+    //         } catch (err) {
+    //             console.error("Error checking coach acceptance:", err);
+    //         }
+    //     }
+    // };
 
     useEffect(() => {
         if(coaches.length == 0){
@@ -116,6 +108,8 @@ export default function UserDashboard() {
         if(interviews.length == 0){
             fetchData();       
         }
+
+        fetchCoachFeedback()
         // if (user && user.coachId && coaches.length > 0) {
         //     const userCoachId = typeof user.coachId === "object" ? user.coachId._id : user.coachId;
         //     const coachObj = coaches.find((c) => c.id === userCoachId);
@@ -155,6 +149,7 @@ export default function UserDashboard() {
             console.log("Fetched sessions:", data);
             setCount(data.filter((i) => i.isComplete).length);
             setInterviews(data);
+            fetchCoachFeedback()
         } catch (err) {
             console.error("Failed to fetch sessions:", err);
         } finally {
