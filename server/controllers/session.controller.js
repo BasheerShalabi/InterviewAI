@@ -3,7 +3,6 @@ const User = require('../models/user.model')
 const callAiModel = require('../utils/ai');
 const parseAiFeedback = require('../utils/parser');
 const { cleanQuestion } = require('../utils/responseCleaner')
-const User = require('../models/user.model');
 
 module.exports.createSession = async (req, res) => {
     try {
