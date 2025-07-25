@@ -3,6 +3,8 @@ import { motion } from "framer-motion";
 import { CheckCircle, FileText, User, Users, Clock, Award, X, AlertTriangle, MessageCircle, Star, Send, Eye } from "lucide-react";
 import HeaderComponent from "../components/HeaderComponent";
 import { useAuth } from "../context/AuthContext";
+import { Link } from "react-router-dom";
+
 
 export default function CoachDashboard() {
     const { user, logout } = useAuth();
@@ -19,7 +21,6 @@ export default function CoachDashboard() {
     const [submittingFeedback, setSubmittingFeedback] = useState(false);
     const [activeTab, setActiveTab] = useState("requests"); // "requests", "users", "interviews"
 
-    // Get token from localStorage with error handling
     const getToken = () => {
         try {
             return localStorage.getItem("session") || localStorage.getItem("token") || localStorage.getItem("authToken");
@@ -32,7 +33,7 @@ export default function CoachDashboard() {
     useEffect(() => {
         const fetchData = async () => {
             const token = getToken();
-            
+
             if (!token) {
                 setError("No authentication token found. Please log in again.");
                 setLoading(false);
@@ -50,16 +51,16 @@ export default function CoachDashboard() {
                 // Fetch requests
                 console.log("Fetching coaching requests...");
                 const resRequests = await fetch("http://localhost:8000/api/coaches/requests", {
-                    headers: { 
+                    headers: {
                         "Authorization": `Bearer ${token}`,
                         "Content-Type": "application/json"
                     },
                 });
-                
+
                 if (!resRequests.ok) {
                     throw new Error(`Failed to fetch requests: ${resRequests.status} ${resRequests.statusText}`);
                 }
-                
+
                 const dataRequests = await resRequests.json();
                 console.log("Requests data:", dataRequests);
                 setRequests(Array.isArray(dataRequests) ? dataRequests : []);
@@ -67,16 +68,16 @@ export default function CoachDashboard() {
                 // Fetch assigned users
                 console.log("Fetching assigned users...");
                 const resUsers = await fetch("http://localhost:8000/api/coaches/assigned-users", {
-                    headers: { 
+                    headers: {
                         "Authorization": `Bearer ${token}`,
                         "Content-Type": "application/json"
                     },
                 });
-                
+
                 if (!resUsers.ok) {
                     throw new Error(`Failed to fetch assigned users: ${resUsers.status} ${resUsers.statusText}`);
                 }
-                
+
                 const dataUsers = await resUsers.json();
                 console.log("Assigned users data:", dataUsers);
                 setAssignedUsers(Array.isArray(dataUsers) ? dataUsers : []);
@@ -84,12 +85,12 @@ export default function CoachDashboard() {
                 // Fetch completed interviews for feedback
                 console.log("Fetching user sessions...");
                 const resInterviews = await fetch("http://localhost:8000/api/coaches/assigned-users/sessions", {
-                    headers: { 
+                    headers: {
                         "Authorization": `Bearer ${token}`,
                         "Content-Type": "application/json"
                     },
                 });
-                
+
                 if (!resInterviews.ok) {
                     console.warn(`Failed to fetch interviews: ${resInterviews.status} ${resInterviews.statusText}`);
                     // Don't throw error for interviews as it's not critical
@@ -97,9 +98,9 @@ export default function CoachDashboard() {
                 } else {
                     const dataInterviews = await resInterviews.json();
                     console.log("Interviews data:", dataInterviews);
-                    
+
                     // Transform the data to match the expected format
-                    const transformedInterviews = Array.isArray(dataInterviews) 
+                    const transformedInterviews = Array.isArray(dataInterviews)
                         ? dataInterviews
                             .filter(session => session.isComplete) // Only completed interviews
                             .map(session => ({
@@ -115,7 +116,7 @@ export default function CoachDashboard() {
                                 createdAt: session.coachFeedback?.createdAt || null
                             }))
                         : [];
-                    
+
                     setCompletedInterviews(transformedInterviews);
                 }
 
@@ -164,12 +165,12 @@ export default function CoachDashboard() {
 
             // Refresh assigned users
             const resUsers = await fetch("http://localhost:8000/api/coaches/assigned-users", {
-                headers: { 
+                headers: {
                     "Authorization": `Bearer ${token}`,
                     "Content-Type": "application/json"
                 },
             });
-            
+
             if (resUsers.ok) {
                 const dataUsers = await resUsers.json();
                 setAssignedUsers(Array.isArray(dataUsers) ? dataUsers : []);
@@ -236,8 +237,6 @@ export default function CoachDashboard() {
                 body: JSON.stringify({
                     feedback: feedbackText,
                     rating: feedbackRating,
-                    coachId: user?._id,
-                    coachName: user?.fullname
                 }),
             });
 
@@ -246,13 +245,13 @@ export default function CoachDashboard() {
             }
 
             // Update the interview status locally
-            setCompletedInterviews(prev => 
-                prev.map(interview => 
-                    interview.interviewId === feedbackModal.interviewId 
-                        ? { 
-                            ...interview, 
-                            hasFeedback: true, 
-                            feedback: feedbackText, 
+            setCompletedInterviews(prev =>
+                prev.map(interview =>
+                    interview.interviewId === feedbackModal.interviewId
+                        ? {
+                            ...interview,
+                            hasFeedback: true,
+                            feedback: feedbackText,
                             rating: feedbackRating,
                             createdAt: new Date().toISOString()
                         }
@@ -309,7 +308,7 @@ export default function CoachDashboard() {
     if (error) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-indigo-100">
-                <motion.div 
+                <motion.div
                     className="text-center max-w-md mx-auto p-6"
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -319,8 +318,8 @@ export default function CoachDashboard() {
                     </div>
                     <h2 className="text-xl font-semibold text-slate-800 mb-2">Unable to Load Dashboard</h2>
                     <p className="text-slate-600 mb-4">{error}</p>
-                    <button 
-                        onClick={() => window.location.reload()} 
+                    <button
+                        onClick={() => window.location.reload()}
                         className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200"
                     >
                         Retry
@@ -333,7 +332,7 @@ export default function CoachDashboard() {
     if (!user) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-indigo-100">
-                <motion.div 
+                <motion.div
                     className="text-center max-w-md mx-auto p-6"
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -343,8 +342,8 @@ export default function CoachDashboard() {
                     </div>
                     <h2 className="text-xl font-semibold text-slate-800 mb-2">Authentication Required</h2>
                     <p className="text-slate-600 mb-4">Please log in to access your coach dashboard.</p>
-                    <button 
-                        onClick={() => logout && logout()} 
+                    <button
+                        onClick={() => logout && logout()}
                         className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200"
                     >
                         Go to Login
@@ -478,31 +477,28 @@ export default function CoachDashboard() {
                     <div className="flex gap-2 bg-white/60 backdrop-blur-sm rounded-xl p-2 border border-white/20">
                         <button
                             onClick={() => setActiveTab("requests")}
-                            className={`flex-1 px-4 py-2 rounded-lg transition-colors duration-200 text-sm font-medium ${
-                                activeTab === "requests" 
-                                    ? "bg-indigo-600 text-white shadow-md" 
+                            className={`flex-1 px-4 py-2 rounded-lg transition-colors duration-200 text-sm font-medium ${activeTab === "requests"
+                                    ? "bg-indigo-600 text-white shadow-md"
                                     : "text-slate-600 hover:bg-white/80"
-                            }`}
+                                }`}
                         >
                             Pending Requests ({requests.length})
                         </button>
                         <button
                             onClick={() => setActiveTab("users")}
-                            className={`flex-1 px-4 py-2 rounded-lg transition-colors duration-200 text-sm font-medium ${
-                                activeTab === "users" 
-                                    ? "bg-indigo-600 text-white shadow-md" 
+                            className={`flex-1 px-4 py-2 rounded-lg transition-colors duration-200 text-sm font-medium ${activeTab === "users"
+                                    ? "bg-indigo-600 text-white shadow-md"
                                     : "text-slate-600 hover:bg-white/80"
-                            }`}
+                                }`}
                         >
                             Assigned Users ({assignedUsers.length})
                         </button>
                         <button
                             onClick={() => setActiveTab("interviews")}
-                            className={`flex-1 px-4 py-2 rounded-lg transition-colors duration-200 text-sm font-medium ${
-                                activeTab === "interviews" 
-                                    ? "bg-indigo-600 text-white shadow-md" 
+                            className={`flex-1 px-4 py-2 rounded-lg transition-colors duration-200 text-sm font-medium ${activeTab === "interviews"
+                                    ? "bg-indigo-600 text-white shadow-md"
                                     : "text-slate-600 hover:bg-white/80"
-                            }`}
+                                }`}
                         >
                             Interview Feedback ({completedInterviews.length})
                         </button>
@@ -674,11 +670,10 @@ export default function CoachDashboard() {
                                                         {[...Array(5)].map((_, i) => (
                                                             <Star
                                                                 key={i}
-                                                                className={`w-4 h-4 ${
-                                                                    i < interview.rating 
-                                                                        ? "text-yellow-400 fill-current" 
+                                                                className={`w-4 h-4 ${i < interview.rating
+                                                                        ? "text-yellow-400 fill-current"
                                                                         : "text-gray-300"
-                                                                }`}
+                                                                    }`}
                                                             />
                                                         ))}
                                                     </div>
@@ -693,6 +688,13 @@ export default function CoachDashboard() {
                                         )}
 
                                         <div className="flex justify-end gap-3">
+                                            <div className="mt-4 text-right">
+                                                <Link to={`/chat/session/${interview._id}`} className="inline-flex items-center gap-2 px-4 py-2 bg-slate-700 text-white rounded-xl hover:bg-slate-800 transition-all duration-300 text-sm">
+                                                    <Eye className="w-4 h-4" />
+                                                    View Details
+                                                </Link>
+                                            </div>
+
                                             {interview.hasFeedback ? (
                                                 <button
                                                     onClick={() => openFeedbackModal(interview)}
@@ -734,12 +736,12 @@ export default function CoachDashboard() {
                             </div>
                             <h3 className="text-lg font-semibold text-slate-800">Confirm Removal</h3>
                         </div>
-                        
+
                         <p className="text-slate-600 mb-6">
-                            Are you sure you want to remove <span className="font-semibold text-slate-800">{removeConfirmation.fullname || removeConfirmation.name || "this user"}</span> from your coaching list? 
+                            Are you sure you want to remove <span className="font-semibold text-slate-800">{removeConfirmation.fullname || removeConfirmation.name || "this user"}</span> from your coaching list?
                             This action cannot be undone and they will need to send a new request to be coached by you again.
                         </p>
-                        
+
                         <div className="flex gap-3 justify-end">
                             <button
                                 onClick={cancelRemoval}
@@ -792,11 +794,10 @@ export default function CoachDashboard() {
                                             className="p-1 hover:scale-110 transition-transform duration-200"
                                         >
                                             <Star
-                                                className={`w-6 h-6 ${
-                                                    star <= feedbackRating
+                                                className={`w-6 h-6 ${star <= feedbackRating
                                                         ? "text-yellow-400 fill-current"
                                                         : "text-gray-300 hover:text-yellow-200"
-                                                }`}
+                                                    }`}
                                             />
                                         </button>
                                     ))}

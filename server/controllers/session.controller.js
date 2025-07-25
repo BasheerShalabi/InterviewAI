@@ -2,11 +2,12 @@ const Session = require('../models/session.model');
 const User = require('../models/user.model')
 const callAiModel = require('../utils/ai');
 const parseAiFeedback = require('../utils/parser');
-const {cleanQuestion} = require('../utils/responseCleaner')
+const { cleanQuestion } = require('../utils/responseCleaner')
+const User = require('../models/user.model');
 
 module.exports.createSession = async (req, res) => {
     try {
-        const { raw, numQuestions , type } = req.body;
+        const { raw, numQuestions, type } = req.body;
         const userId = req.user.id;
 
         const fetchedUser = await User.findOne({ userId })
@@ -40,10 +41,19 @@ module.exports.getMySessions = async (req, res) => {
 
 module.exports.getSessionById = async (req, res) => {
     try {
-        const session = await Session.findOne({ _id: req.params.id, userId: req.user.id });
+        const session = await Session.findById(req.params.id);
         if (!session) return res.status(404).json({ error: "Session not found" });
 
-        res.json(session);
+        if (session.userId.toString() === req.user.id) {
+            return res.json(session);
+        }
+
+        const sessionOwner = await User.findById(session.userId);
+        if (sessionOwner && sessionOwner.assignedCoachId?.toString() === req.user.id) {
+            return res.json(session);
+        }
+
+        return res.status(403).json({ error: "Access denied" });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -63,7 +73,7 @@ module.exports.sendMessage = async (req, res) => {
         if (session.isComplete) return res.status(400).json({ error: 'Session already completed' });
 
         const prompt = `
-           You are acting as a professional interviewer. You will behave like a real person conducting a job interview — asking one question at a time based on the user's CV and responses. Do NOT ask all the questions at once. Begin by greeting the candidate and asking the first question only. Then wait for their response before continuing. Each new message should contain only the next appropriate question and nothing more.
+            You are acting as a professional interviewer. You will behave like a real person conducting a job interview — asking one question at a time based on the user's CV and responses. Do NOT ask all the questions at once. Begin by greeting the candidate and asking the first question only. Then wait for their response before continuing. Each new message should contain only the next appropriate question and nothing more.
 
 
             Below is the candidate’s raw CV text, extracted from a PDF:
@@ -75,7 +85,7 @@ module.exports.sendMessage = async (req, res) => {
                         
             `
 
-        if(session.messages.length === 0 && content.trim() === 'start' && !session.inProgress) {
+        if (session.messages.length === 0 && content.trim() === 'start' && !session.inProgress) {
 
             const aiStart = [
                 { role: 'system', content: prompt },
@@ -135,7 +145,7 @@ module.exports.sendMessage = async (req, res) => {
                                 },
                                 "suggestions": "Be more specific and back up answers with real examples."
                             }
-                            }` }, 
+                            }` },
                 ...session.messages,
                 { role: 'user', content: 'That was my last answer. Please provide detailed feedback, a summary, and a score from 1 to 10.' }
             ];
@@ -164,14 +174,14 @@ module.exports.sendMessage = async (req, res) => {
     }
 };
 
-module.exports.updateCoachFeedback = async (req, res) =>{
-    try{
+module.exports.updateCoachFeedback = async (req, res) => {
+    try {
         const feedback = req.body
-        const session = await Session.findByIdAndUpdate(req.params.id, {coachFeedback:feedback});        
+        const session = await Session.findByIdAndUpdate(req.params.id, { coachFeedback: feedback });
         if (!session) return res.status(404).json({ error: "Session not found" });
-        
+
         res.json(session);
-    }catch(err){
+    } catch (err) {
         res.status(500).json({ error: err.message });
     }
 }
