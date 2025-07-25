@@ -1,6 +1,7 @@
+const {clean} = require("./responseCleaner")
 function parseAiFeedback(responseText) {
   try {
-    const cleaned = responseText.trim().replace(/^```json/, '').replace(/```$/, '').trim();
+    const cleaned = clean(responseText)
 
     const parsed = JSON.parse(cleaned);
 

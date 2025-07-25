@@ -6,7 +6,6 @@ import axios from 'axios';
 import FooterComponent from '../components/FooterComponent';
 import { useNavigate } from 'react-router-dom';
 import HeaderComponent from '../components/HeaderComponent';
-import { use } from 'react';
 
 export default function InterviewForm() {
     const redirect = useNavigate()
@@ -127,7 +126,7 @@ export default function InterviewForm() {
                         ))}
                     </div>
                     <div className="flex justify-between text-sm text-slate-600">
-                        <span>Candidate Info</span>
+                        <span>Select CV</span>
                         <span>CV Analysis</span>
                         <span>Interview Setup</span>
                     </div>
@@ -141,79 +140,9 @@ export default function InterviewForm() {
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.6 }}
                     >
-                        <h2 className="text-2xl font-bold text-slate-800 mb-6">Candidate Information</h2>
+                        <h2 className="text-2xl font-bold text-slate-800 mb-6">CV Upload</h2>
 
-                        <div className="grid md:grid-cols-2 gap-6">
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-2">
-                                    Candidate Name
-                                </label>
-                                <div className="relative">
-                                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
-                                    <input
-                                        type="text"
-                                        name="candidateName"
-                                        value={formData.candidateName}
-                                        onChange={handleInputChange}
-                                        className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all duration-300 bg-white/50 backdrop-blur-sm"
-                                        placeholder="Enter candidate's full name"
-                                        required
-                                    />
-                                </div>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-2">
-                                    Email Address
-                                </label>
-                                <input
-                                    type="email"
-                                    name="candidateEmail"
-                                    value={formData.candidateEmail}
-                                    onChange={handleInputChange}
-                                    className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all duration-300 bg-white/50 backdrop-blur-sm"
-                                    placeholder="candidate@example.com"
-                                    required
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-2">
-                                    Position
-                                </label>
-                                <div className="relative">
-                                    <Briefcase className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
-                                    <input
-                                        type="text"
-                                        name="position"
-                                        value={formData.position}
-                                        onChange={handleInputChange}
-                                        className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all duration-300 bg-white/50 backdrop-blur-sm"
-                                        placeholder="e.g., Senior Frontend Developer"
-                                        required
-                                    />
-                                </div>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-2">
-                                    Experience Level
-                                </label>
-                                <select
-                                    name="experience"
-                                    value={formData.experience}
-                                    onChange={handleInputChange}
-                                    className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all duration-300 bg-white/50 backdrop-blur-sm"
-                                    required
-                                >
-                                    <option value="">Select experience level</option>
-                                    <option value="junior">Junior (0-2 years)</option>
-                                    <option value="mid">Mid-level (2-5 years)</option>
-                                    <option value="senior">Senior (5+ years)</option>
-                                    <option value="lead">Lead/Principal (8+ years)</option>
-                                </select>
-                            </div>
-                        </div>
+                        
 
                         <div className="mt-6">
                             <label className="block text-sm font-medium text-slate-700 mb-2">
@@ -228,12 +157,12 @@ export default function InterviewForm() {
                                         <input
                                             type="file"
                                             onChange={handleFileUpload}
-                                            accept=".pdf,.doc,.docx"
+                                            accept=".pdf"
                                             className="hidden"
                                         />
                                     </label>
                                 </p>
-                                <p className="text-sm text-slate-500">PDF, DOC, DOCX up to 10MB</p>
+                                <p className="text-sm text-slate-500">PDF up to 10MB</p>
                                 {formData.cv && (
                                     <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
                                         <p className="text-green-700 font-medium">{formData.cv.name}</p>
@@ -245,7 +174,7 @@ export default function InterviewForm() {
                         <div className="flex justify-end mt-8">
                             <motion.button
                                 onClick={() => setStep(2)}
-                                disabled={!formData.candidateName || !formData.candidateEmail || !formData.position || !formData.cv}
+                                disabled={!formData.cv}
                                 className="bg-gradient-to-r from-slate-600 to-slate-700 text-white px-8 py-3 rounded-xl font-semibold hover:from-slate-700 hover:to-slate-800 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}
