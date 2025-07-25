@@ -54,8 +54,19 @@ export default function UserDashboard() {
     };
 
     const fetchCoachFeedback = async () => {
-        setCoachFeedback(interviews.map(i => i.coachFeedback));
-        console.log(coachFeedback)
+        // Extract coach feedback from interviews data
+        const feedbackArray = interviews
+            .filter(interview => interview.coachFeedback) // Only interviews with coach feedback
+            .map(interview => ({
+                interviewId: interview._id,
+                feedback: interview.coachFeedback.feedback || "",
+                rating: interview.coachFeedback.rating || 0,
+                createdAt: interview.coachFeedback.createdAt || interview.updatedAt,
+                interviewType: interview.type || "General"
+            }));
+        
+        setCoachFeedback(feedbackArray);
+        console.log("Coach feedback extracted:", feedbackArray);
     };
 
     const fetchCoaches = async () => {
@@ -102,22 +113,22 @@ export default function UserDashboard() {
     // };
 
     useEffect(() => {
+        console.log("User data:");
         if(coaches.length == 0){
             fetchCoaches();
         }
         if(interviews.length == 0){
             fetchData();       
         }
+    }, [user]);
 
-        fetchCoachFeedback()
-        // if (user && user.coachId && coaches.length > 0) {
-        //     const userCoachId = typeof user.coachId === "object" ? user.coachId._id : user.coachId;
-        //     const coachObj = coaches.find((c) => c.id === userCoachId);
-        //     if (coachObj) {
-        //         setCurrentCoach(coachObj.name);
-        //     }
-        // }
-    }, [user, coaches]);
+    // Extract coach feedback whenever interviews data changes
+    useEffect(() => {
+        if (interviews.length > 0) {
+            fetchCoachFeedback();
+            console.log("Coach feedback updated:",);
+        }
+    }, [interviews]);
 
     const getCurrentCoachName = () => {
         if (!user || !user.coachId) return "";
@@ -149,7 +160,6 @@ export default function UserDashboard() {
             console.log("Fetched sessions:", data);
             setCount(data.filter((i) => i.isComplete).length);
             setInterviews(data);
-            fetchCoachFeedback()
         } catch (err) {
             console.error("Failed to fetch sessions:", err);
         } finally {
@@ -198,8 +208,11 @@ export default function UserDashboard() {
     // Calculate average rating from coach feedback
     const getAverageRating = () => {
         if (coachFeedback.length === 0) return 0;
-        const total = coachFeedback.reduce((sum, feedback) => sum + (feedback.rating || 0), 0);
-        return (total / coachFeedback.length).toFixed(1);
+        const validRatings = coachFeedback.filter(feedback => feedback.rating > 0);
+        if (validRatings.length === 0) return 0;
+        
+        const total = validRatings.reduce((sum, feedback) => sum + feedback.rating, 0);
+        return (total / validRatings.length).toFixed(1);
     };
 
     // Get feedback for a specific interview
