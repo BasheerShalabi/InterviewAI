@@ -74,15 +74,14 @@ export default function UserDashboard() {
             const data = res.data;
             setCoaches(data.map((c) => ({ id: c._id, name: c.fullname })));
 
-            const currentUser = await fetchUserData();
-            
-            if (currentUser && currentUser.coachId) {
-                const userCoachId = typeof currentUser.coachId === "object" ? currentUser.coachId._id : currentUser.coachId;
-                const coachObj = data.find((c) => c._id === userCoachId);
-                if (coachObj) {
-                    setCurrentCoach(coachObj.fullname);
-                }
-            }
+            // if (user && user.coachId) {
+            //     const userCoachId = typeof user.coachId === "object" ? user.coachId._id : user.coachId;
+            //     const coachObj = data.find((c) => c._id === userCoachId);
+            //     if (coachObj) {
+                    // setCurrentCoach(data.find((c) => c._id === user.coachId));
+                // }
+
+            // }
         } catch (err) {
             console.error("Error fetching coaches:", err);
         }
@@ -111,33 +110,19 @@ export default function UserDashboard() {
     };
 
     useEffect(() => {
-        fetchCoaches();
-        fetchData();
-        fetchCoachFeedback();
-    }, []);
-
-    useEffect(() => {
-        let interval;
-        
-        if (coachRequested && !user?.coachId) {
-            interval = setInterval(checkForCoachAcceptance, 5000);
+        if(coaches.length == 0){
+            fetchCoaches();
         }
-        
-        return () => {
-            if (interval) {
-                clearInterval(interval);
-            }
-        };
-    }, [coachRequested, user?.coachId, coaches]);
-
-    useEffect(() => {
-        if (user && user.coachId && coaches.length > 0) {
-            const userCoachId = typeof user.coachId === "object" ? user.coachId._id : user.coachId;
-            const coachObj = coaches.find((c) => c.id === userCoachId);
-            if (coachObj) {
-                setCurrentCoach(coachObj.name);
-            }
+        if(interviews.length == 0){
+            fetchData();       
         }
+        // if (user && user.coachId && coaches.length > 0) {
+        //     const userCoachId = typeof user.coachId === "object" ? user.coachId._id : user.coachId;
+        //     const coachObj = coaches.find((c) => c.id === userCoachId);
+        //     if (coachObj) {
+        //         setCurrentCoach(coachObj.name);
+        //     }
+        // }
     }, [user, coaches]);
 
     const getCurrentCoachName = () => {
@@ -156,7 +141,7 @@ export default function UserDashboard() {
         return currentCoach;
     };
 
-    const completedCount = interviews.filter((i) => i.isCompleted).length;
+    // const completedCount = interviews.filter((i) => i.isCompleted).length;
 
     const fetchData = async () => {
         try {

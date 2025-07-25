@@ -40,7 +40,7 @@ export default function Register() {
         const result = await register(formData.fullname,formData.email,formData.password);
         
         if (result.success) {
-            navigate('/interview');
+            navigate('/dashboard');
         } else {
             setError(result.error);
         }

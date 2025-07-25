@@ -23,23 +23,25 @@ export default function AIChatBox() {
     const fetchSession = async () => {
         setSending(true)
         try {
-            const res = await axios({ method: 'get', url: `http://localhost:8000/api/sessions/${id}`,
-                headers: { Authorization: `Bearer ${token}` }})
-        
-                const session = res.data;
-                setMessages(session.messages);
-                console.log("Session fetched:", session);
-                showAlert("Session loaded successfully", "success");
-                setSessionFlag(true);
-                console.log("Session in progress:", session.inProgress);
-                setIsFirstMessage(session.inProgress);
-                if(!session.inProgress && !session.isComplete) {
-                    initalizeSession();
-                }
-            
+            const res = await axios({
+                method: 'get', url: `http://localhost:8000/api/sessions/${id}`,
+                headers: { Authorization: `Bearer ${token}` }
+            })
+
+            const session = res.data;
+            setMessages(session.messages);
+            console.log("Session fetched:", session);
+            showAlert("Session loaded successfully", "success");
+            setSessionFlag(true);
+            console.log("Session in progress:", session.inProgress);
+            setIsFirstMessage(session.inProgress);
+            if (!session.inProgress && !session.isComplete) {
+                initalizeSession();
+            }
+
         } catch (err) {
             console.error("Error fetching session:", err);
-        }finally {
+        } finally {
             setSending(false);
         }
     }
@@ -47,23 +49,25 @@ export default function AIChatBox() {
     const initalizeSession = async () => {
         setSending(true)
         try {
-            const res = await axios({ method: 'post', url: `http://localhost:8000/api/sessions/${id}/message`,
-                headers: { Authorization: `Bearer ${token}` } , data: { content: "start" }})
-            
-            
-                const message = res.data;
-                console.log("AI Response:", message);
-                setMessages((prev) => [
-                    ...prev,
-                    { role: "assistant", content: message.content },
-                ]);
-                console.log("Session initialized:", message);
-                showAlert("Session initalized successfully", "success");
-                setIsFirstMessage(true);
-            
+            const res = await axios({
+                method: 'post', url: `http://localhost:8000/api/sessions/${id}/message`,
+                headers: { Authorization: `Bearer ${token}` }, data: { content: "start" }
+            })
+
+
+            const message = res.data;
+            console.log("AI Response:", message);
+            setMessages((prev) => [
+                ...prev,
+                { role: "assistant", content: message.content },
+            ]);
+            console.log("Session initialized:", message);
+            showAlert("Session initalized successfully", "success");
+            setIsFirstMessage(true);
+
         } catch (err) {
             console.error("Error fetching session:", err);
-        }finally {
+        } finally {
             setSending(false);
         }
         console.log(isFirstMessage);
@@ -85,44 +89,66 @@ export default function AIChatBox() {
         ]);
 
         try {
-            const res = await axios({ method: 'post', url: `http://localhost:8000/api/sessions/${id}/message`,
-                headers: { Authorization: `Bearer ${token}` } , data: { content: input }})
-            
-                const message = res.data;                
-                console.log("AI Response:", message);
-                if(message.done){
-                    showAlert("Interview Finished , redirecting", "info");
-                    setTimeout(() => {
-                        redirect(`/results/${id}`);
-                    }, 1000);
-                }
-                setMessages((prev) => [
-                    ...prev,
-                    { role: "assistant", content: message.content },
-                ]);
-                showAlert("Session initalized successfully", "success");
-                setIsFirstMessage(true);
+            const res = await axios({
+                method: 'post', url: `http://localhost:8000/api/sessions/${id}/message`,
+                headers: { Authorization: `Bearer ${token}` }, data: { content: input }
+            })
+
+            const message = res.data;
+            console.log("AI Response:", message);
+            if (message.done) {
+                showAlert("Interview Finished , redirecting", "info");
+                setTimeout(() => {
+                    redirect(`/results/${id}`);
+                }, 1000);
+            }
+            if (!message.content) {
+                throw new Error("AI model did not return any content.");
+            }
+
+            setMessages((prev) => [
+                ...prev,
+                { role: "assistant", content: message.content },
+            ]);
+            if (!isFirstMessage) {
+                showAlert("Session initialized successfully", "success");
+            } else {
+                showAlert("Message sent", "success");
+            }
+            setIsFirstMessage(true);
+            setInput("");
 
         } catch (err) {
-            console.error("Error fetching session:", err);
+            if (!isFirstMessage) {
+                console.error("Error fetching session:", err);
+            } else {
+                console.error("Error sending message:", err);
+            }
+
+            setMessages((prev) => prev.slice(0, -1));
+
+            if (err.response?.status === 400 || err.message.includes("tokens")) {
+                showAlert("Your message may be too long. Try shortening it.", "error");
+            } else {
+                showAlert("Something went wrong. Please try again.", "error");
+            }
         } finally {
-            setInput("");
             setSending(false);
         }
     };
 
-    const conversation = messages.map((msg , i) => (
-                    <motion.div
-                        key={i}
-                        initial={{ opacity: 0, x: msg.role === "assistant" ? -20 : 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.3 }}
-                        className={`max-w-[70%] mb-4 px-5 py-3 rounded-2xl whitespace-pre-wrap break-words
+    const conversation = messages.map((msg, i) => (
+        <motion.div
+            key={i}
+            initial={{ opacity: 0, x: msg.role === "assistant" ? -20 : 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3 }}
+            className={`max-w-[70%] mb-4 px-5 py-3 rounded-2xl whitespace-pre-wrap break-words
                         ${msg.role === "assistant" ? "bg-indigo-100 text-indigo-900 self-start" : "bg-slate-300 text-slate-900 self-end"}`}
-                    >
-                        {msg.content}
-                    </motion.div>
-                ))
+        >
+            {msg.content}
+        </motion.div>
+    ))
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-8 flex flex-col max-w-5xl mx-auto rounded-3xl shadow-2xl border border-white/20 backdrop-blur-xl">
@@ -142,6 +168,14 @@ export default function AIChatBox() {
                 style={{ scrollbarWidth: "thin" }}
             >
                 {conversation}
+                {sending && (
+                    <div className="flex items-center gap-2 mt-4">
+                        <div className="w-3 h-3 bg-gray-400 rounded-full animate-bounce [animation-delay:0s]"></div>
+                        <div className="w-3 h-3 bg-gray-400 rounded-full animate-bounce [animation-delay:0.1s]"></div>
+                        <div className="w-3 h-3 bg-gray-400 rounded-full animate-bounce [animation-delay:0.2s]"></div>
+                        <span className="text-gray-500 text-sm ml-2">Sending ...</span>
+                    </div>
+                )}
                 <div ref={messagesEndRef} />
             </motion.div>
 
@@ -155,7 +189,7 @@ export default function AIChatBox() {
                     rows={1}
                     ref={textareaRef}
                     placeholder="Type your message..."
-                    className="flex-grow rounded-2xl border border-slate-300 px-6 py-3 text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 backdrop-blur-sm bg-white/70 max-h-48 overflow-y-hidden resize-none scrollbar-none"                    value={input}
+                    className="flex-grow rounded-2xl border border-slate-300 px-6 py-3 text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 backdrop-blur-sm bg-white/70 max-h-48 overflow-y-hidden resize-none scrollbar-none" value={input}
                     disabled={sending}
                     onChange={(e) => {
                         setInput(e.target.value)

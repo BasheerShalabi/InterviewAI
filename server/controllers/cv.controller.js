@@ -1,9 +1,9 @@
 const analyzeCV = require('../utils/cvAnalyzer');
-
+const {clean} = require('../utils/responseCleaner')
 module.exports.uploadCV = async (req, res) => {
   try {
     const result = await analyzeCV(req.file.path);
-    const cleaned = result.result.trim().replace(/^```json/, '').replace(/```$/, '').trim();
+    const cleaned = clean(result.result)
     const parsed = JSON.parse(cleaned);
     res.json({result:parsed,raw:result.raw});
   } catch (err) {
