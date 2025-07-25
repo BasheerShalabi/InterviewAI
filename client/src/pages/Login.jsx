@@ -41,7 +41,7 @@ export default function Login() {
                 const data = await response.json();
                 login(data.token);
                 console.log("UserToken logged in:", data.token);
-                navigate('/interview');
+                navigate('/dashboard');
             }
     
             setLoading(false);

@@ -24,7 +24,6 @@ export default function UserDashboard() {
     const [selectedCoach, setSelectedCoach] = useState("");
     const [coachRequested, setCoachRequested] = useState(user?.coachRequestPending || false);
     const [chatOpen, setChatOpen] = useState(false);
-    const [currentCoach, setCurrentCoach] = useState("");
     const token = localStorage.getItem("session");
     const [count , setCount] = useState(0);
 
@@ -37,29 +36,33 @@ export default function UserDashboard() {
             const data = res.data;
             setCoaches(data.map((c) => ({ id: c._id, name: c.fullname })));
 
-            if (user && user.coachId) {
-                const userCoachId = typeof user.coachId === "object" ? user.coachId._id : user.coachId;
-                const coachObj = data.find((c) => c._id === userCoachId);
-                if (coachObj) {
-                    setCurrentCoach(coachObj.fullname);
-                }
+            // if (user && user.coachId) {
+            //     const userCoachId = typeof user.coachId === "object" ? user.coachId._id : user.coachId;
+            //     const coachObj = data.find((c) => c._id === userCoachId);
+            //     if (coachObj) {
+                    // setCurrentCoach(data.find((c) => c._id === user.coachId));
+                // }
 
-            }
+            // }
         } catch (err) {
             console.error("Error fetching coaches:", err);
         }
     };
 
     useEffect(() => {
-        fetchCoaches();
-        fetchData();       
-        if (user && user.coachId && coaches.length > 0) {
-            const userCoachId = typeof user.coachId === "object" ? user.coachId._id : user.coachId;
-            const coachObj = coaches.find((c) => c.id === userCoachId);
-            if (coachObj) {
-                setCurrentCoach(coachObj.name);
-            }
+        if(coaches.length == 0){
+            fetchCoaches();
         }
+        if(interviews.length == 0){
+            fetchData();       
+        }
+        // if (user && user.coachId && coaches.length > 0) {
+        //     const userCoachId = typeof user.coachId === "object" ? user.coachId._id : user.coachId;
+        //     const coachObj = coaches.find((c) => c.id === userCoachId);
+        //     if (coachObj) {
+        //         setCurrentCoach(coachObj.name);
+        //     }
+        // }
     }, [user, coaches]);
 
     const getCurrentCoachName = () => {
@@ -74,11 +77,9 @@ export default function UserDashboard() {
             const coachObj = coaches.find((c) => c.id === userCoachId);
             return coachObj ? coachObj.name : "";
         }
-        
-        return currentCoach;
     };
 
-    const completedCount = interviews.filter((i) => i.isCompleted).length;
+    // const completedCount = interviews.filter((i) => i.isCompleted).length;
 
     const fetchData = async () => {
         try {
@@ -130,7 +131,7 @@ export default function UserDashboard() {
 
     const renderedData = interviews.map((session, index) => (
         <motion.div
-        key={session.id}
+        key={index}
         className="bg-white/80 backdrop-blur-xl shadow-xl rounded-2xl p-6 border border-white/20"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -170,8 +171,8 @@ export default function UserDashboard() {
             <Star className="w-4 h-4" />
             Feedback
           </div>
-            {session.feedback.map(e=>{
-          return <p className="text-slate-700">
+            {session.feedback.map((e,i)=>{
+          return <p key={i} className="text-slate-700">
             {e.questionNumber}: {e.content};
           </p>
           })}
