@@ -5,10 +5,7 @@ import {
     UserCheck,
     MessageCircle,
     TrendingUp,
-    Calendar,
-    Award,
     Search,
-    Filter,
     Eye,
     Edit,
     Trash2,
@@ -24,6 +21,7 @@ import {
     X,
     Settings
 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 // Users Management Component
 const UsersManagement = ({ users, onRefresh }) => {
@@ -34,7 +32,7 @@ const UsersManagement = ({ users, onRefresh }) => {
 
     const filteredUsers = users.filter(user => {
         const matchesSearch = user.fullname?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.email?.toLowerCase().includes(searchTerm.toLowerCase());
+            user.email?.toLowerCase().includes(searchTerm.toLowerCase())
         const matchesFilter = filterType === "all" ||
             (filterType === "active" && user.status === "active") ||
             (filterType === "inactive" && user.status === "inactive") ||
@@ -78,13 +76,7 @@ const UsersManagement = ({ users, onRefresh }) => {
                     <option value="coached">With Coach</option>
                     <option value="uncoached">Without Coach</option>
                 </select>
-                <button
-                    onClick={() => openModal()}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200"
-                >
-                    <Plus className="w-4 h-4" />
-                    Add User
-                </button>
+                
             </div>
 
             {/* Users List */}
@@ -107,8 +99,8 @@ const UsersManagement = ({ users, onRefresh }) => {
                                     <p className="text-sm text-slate-600">{user.email}</p>
                                     <div className="flex items-center gap-4 mt-1">
                                         <span className={`text-xs px-2 py-1 rounded-full font-medium ${user.status === "active"
-                                                ? "bg-green-100 text-green-700"
-                                                : "bg-red-100 text-red-700"
+                                            ? "bg-green-100 text-green-700"
+                                            : "bg-red-100 text-red-700"
                                             }`}>
                                             {user.status}
                                         </span>
@@ -193,8 +185,8 @@ const UsersManagement = ({ users, onRefresh }) => {
                                     <div>
                                         <label className="block text-sm font-medium text-slate-700 mb-1">Status</label>
                                         <span className={`text-xs px-2 py-1 rounded-full font-medium ${selectedUser.status === "active"
-                                                ? "bg-green-100 text-green-700"
-                                                : "bg-red-100 text-red-700"
+                                            ? "bg-green-100 text-green-700"
+                                            : "bg-red-100 text-red-700"
                                             }`}>
                                             {selectedUser.status}
                                         </span>
@@ -202,8 +194,8 @@ const UsersManagement = ({ users, onRefresh }) => {
                                     <div>
                                         <label className="block text-sm font-medium text-slate-700 mb-1">Coach Status</label>
                                         <span className={`text-xs px-2 py-1 rounded-full font-medium ${selectedUser.coachId
-                                                ? "bg-blue-100 text-blue-700"
-                                                : "bg-gray-100 text-gray-700"
+                                            ? "bg-blue-100 text-blue-700"
+                                            : "bg-gray-100 text-gray-700"
                                             }`}>
                                             {selectedUser.coachId ? "Assigned" : "Unassigned"}
                                         </span>
@@ -242,10 +234,10 @@ const UsersManagement = ({ users, onRefresh }) => {
                                                         <span className="text-sm font-medium">
                                                             {session.type || "General"} Interview
                                                         </span>
-                                                        <span className={`text-xs px-2 py-1 rounded-full ${session.isComplete 
-                                                            ? 'bg-green-100 text-green-700' 
+                                                        <span className={`text-xs px-2 py-1 rounded-full ${session.isComplete
+                                                            ? 'bg-green-100 text-green-700'
                                                             : 'bg-orange-100 text-orange-700'
-                                                        }`}>
+                                                            }`}>
                                                             {session.isComplete ? 'Completed' : 'In Progress'}
                                                         </span>
                                                     </div>
@@ -284,13 +276,15 @@ const CoachesManagement = ({ coaches, onRefresh }) => {
     const [selectedCoach, setSelectedCoach] = useState(null);
     const [showModal, setShowModal] = useState(false);
 
-    console.log(coaches);
+    console.log("loaded coaches", coaches);
 
-    const filteredCoaches = coaches.filter(coach => {
-        const matchesSearch = coach.fullname?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            coach.email?.toLowerCase().includes(searchTerm.toLowerCase()) || coach.role == "coach";
-        return matchesSearch;
-    });
+    const filteredCoaches = !searchTerm
+        ? coaches
+        : coaches.filter(coach => {
+            const name = coach.fullname?.toLowerCase() || '';
+            const email = coach.email?.toLowerCase() || '';
+            return name.includes(searchTerm.toLowerCase()) || email.includes(searchTerm.toLowerCase());
+        });
 
     const openModal = (coach = null) => {
         setSelectedCoach(coach);
@@ -301,6 +295,67 @@ const CoachesManagement = ({ coaches, onRefresh }) => {
         setShowModal(false);
         setSelectedCoach(null);
     };
+
+    const displayCoaches = filteredCoaches.map((coach, index) => (
+        <motion.div
+            key={index}
+            className="bg-white/80 backdrop-blur-xl shadow-lg rounded-xl p-6 border border-white/20"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 * index }}
+        >
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                    <div className="bg-green-100 p-3 rounded-full">
+                        <UserCheck className="w-6 h-6 text-green-600" />
+                    </div>
+                    <div>
+                        <h3 className="text-lg font-semibold text-slate-800">{coach.fullname}</h3>
+                        <p className="text-sm text-slate-600">{coach.email}</p>
+                        <span className={`text-xs px-2 py-1 rounded-full font-medium mt-1 inline-block ${coach.status === "active"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-red-100 text-red-700"
+                            }`}>
+                            {coach.status}
+                        </span>
+                    </div>
+                </div>
+                <div className="text-right">
+                    <div className="grid grid-cols-3 gap-4 mb-3">
+                        <div className="text-center">
+                            <p className="text-lg font-bold text-slate-800">{coach.assignedUsers.length}</p>
+                            <p className="text-xs text-slate-600">Users</p>
+                        </div>
+                        <div className="text-center">
+                            <p className="text-lg font-bold text-blue-600">{coach.totalFeedbacks}</p>
+                            <p className="text-xs text-slate-600">Feedbacks</p>
+                        </div>
+                        <div className="text-center">
+                            <div className="flex items-center gap-1 justify-center">
+                                <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                                <span className="text-lg font-bold text-slate-800">{coach.averageRating || 0}</span>
+                            </div>
+                            <p className="text-xs text-slate-600">Rating</p>
+                        </div>
+                    </div>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => openModal(coach)}
+                            className="p-2 text-slate-600 hover:text-indigo-600 transition-colors duration-200"
+                        >
+                            <Eye className="w-4 h-4" />
+                        </button>
+                        <button className="p-2 text-slate-600 hover:text-green-600 transition-colors duration-200">
+                            <Edit className="w-4 h-4" />
+                        </button>
+                        <button className="p-2 text-slate-600 hover:text-red-600 transition-colors duration-200">
+                            <Trash2 className="w-4 h-4" />
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </motion.div>
+    ))
 
     return (
         <div className="space-y-6">
@@ -316,78 +371,12 @@ const CoachesManagement = ({ coaches, onRefresh }) => {
                         className="pl-10 pr-4 py-2 w-full border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white/80 backdrop-blur-sm"
                     />
                 </div>
-                <button
-                    onClick={() => openModal()}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200"
-                >
-                    <Plus className="w-4 h-4" />
-                    Add Coach
-                </button>
+               
             </div>
 
             {/* Coaches List */}
             <div className="space-y-4">
-                {filteredCoaches.map((coach, index) => (
-                    <motion.div
-                        key={coach._id}
-                        className="bg-white/80 backdrop-blur-xl shadow-lg rounded-xl p-6 border border-white/20"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.1 * index }}
-                    >
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                                <div className="bg-green-100 p-3 rounded-full">
-                                    <UserCheck className="w-6 h-6 text-green-600" />
-                                </div>
-                                <div>
-                                    <h3 className="text-lg font-semibold text-slate-800">{coach.fullname}</h3>
-                                    <p className="text-sm text-slate-600">{coach.email}</p>
-                                    <p className="text-sm text-indigo-600 font-medium">{coach.specialization}</p>
-                                    <span className={`text-xs px-2 py-1 rounded-full font-medium mt-1 inline-block ${coach.status === "active"
-                                            ? "bg-green-100 text-green-700"
-                                            : "bg-red-100 text-red-700"
-                                        }`}>
-                                        {coach.status}
-                                    </span>
-                                </div>
-                            </div>
-                            <div className="text-right">
-                                <div className="grid grid-cols-3 gap-4 mb-3">
-                                    <div className="text-center">
-                                        <p className="text-lg font-bold text-slate-800">{coach.assignedUsers}</p>
-                                        <p className="text-xs text-slate-600">Users</p>
-                                    </div>
-                                    <div className="text-center">
-                                        <p className="text-lg font-bold text-blue-600">{coach.totalFeedbacks}</p>
-                                        <p className="text-xs text-slate-600">Feedbacks</p>
-                                    </div>
-                                    <div className="text-center">
-                                        <div className="flex items-center gap-1 justify-center">
-                                            <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                                            <span className="text-lg font-bold text-slate-800">{coach.averageRating}</span>
-                                        </div>
-                                        <p className="text-xs text-slate-600">Rating</p>
-                                    </div>
-                                </div>
-                                <div className="flex gap-2">
-                                    <button
-                                        onClick={() => openModal(coach)}
-                                        className="p-2 text-slate-600 hover:text-indigo-600 transition-colors duration-200"
-                                    >
-                                        <Eye className="w-4 h-4" />
-                                    </button>
-                                    <button className="p-2 text-slate-600 hover:text-green-600 transition-colors duration-200">
-                                        <Edit className="w-4 h-4" />
-                                    </button>
-                                    <button className="p-2 text-slate-600 hover:text-red-600 transition-colors duration-200">
-                                        <Trash2 className="w-4 h-4" />
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </motion.div>
-                ))}
+                {displayCoaches}
             </div>
 
             {/* Coach Modal */}
@@ -422,15 +411,12 @@ const CoachesManagement = ({ coaches, onRefresh }) => {
                                         <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
                                         <p className="text-slate-800">{selectedCoach.email}</p>
                                     </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-slate-700 mb-1">Specialization</label>
-                                        <p className="text-indigo-600 font-medium">{selectedCoach.specialization}</p>
-                                    </div>
+                                    
                                     <div>
                                         <label className="block text-sm font-medium text-slate-700 mb-1">Status</label>
                                         <span className={`text-xs px-2 py-1 rounded-full font-medium ${selectedCoach.status === "active"
-                                                ? "bg-green-100 text-green-700"
-                                                : "bg-red-100 text-red-700"
+                                            ? "bg-green-100 text-green-700"
+                                            : "bg-red-100 text-red-700"
                                             }`}>
                                             {selectedCoach.status}
                                         </span>
@@ -438,7 +424,7 @@ const CoachesManagement = ({ coaches, onRefresh }) => {
                                 </div>
                                 <div className="grid grid-cols-3 gap-4">
                                     <div className="text-center p-4 bg-blue-50 rounded-lg">
-                                        <p className="text-2xl font-bold text-blue-600">{selectedCoach.assignedUsers}</p>
+                                        <p className="text-2xl font-bold text-blue-600">{selectedCoach.assignedUsers.length}</p>
                                         <p className="text-sm text-slate-600">Assigned Users</p>
                                     </div>
                                     <div className="text-center p-4 bg-purple-50 rounded-lg">
@@ -448,7 +434,7 @@ const CoachesManagement = ({ coaches, onRefresh }) => {
                                     <div className="text-center p-4 bg-yellow-50 rounded-lg">
                                         <div className="flex items-center justify-center gap-1">
                                             <Star className="w-5 h-5 text-yellow-400 fill-current" />
-                                            <span className="text-2xl font-bold text-slate-800">{selectedCoach.averageRating}</span>
+                                            <span className="text-2xl font-bold text-slate-800">{selectedCoach.averageRating || 0}</span>
                                         </div>
                                         <p className="text-sm text-slate-600">Average Rating</p>
                                     </div>
@@ -488,12 +474,12 @@ export default function AdminDashboard() {
         try {
             console.log(`Making request to: ${url}`);
             const response = await fetch(url, options);
-            
+
             if (!response.ok) {
                 console.error(`HTTP ${response.status}: ${response.statusText} for ${url}`);
                 return null;
             }
-            
+
             const data = await response.json();
             console.log(`Successfully fetched from ${url}:`, data);
             return data;
@@ -516,7 +502,7 @@ export default function AdminDashboard() {
     // Fetch data from API
     const fetchData = async () => {
         const token = getToken();
-        
+
         if (!token) {
             setError("No authentication token found. Please log in again.");
             setLoading(false);
@@ -534,59 +520,32 @@ export default function AdminDashboard() {
 
             // Fetch all users - try different endpoints
             console.log("Fetching all users...");
-            let usersData = await safeFetch("http://localhost:8000/api/user", { headers });
-            
-            // If /api/user doesn't work, try alternatives
-            if (!usersData) {
-                console.log("Trying alternative user endpoint...");
-                usersData = await safeFetch("http://localhost:8000/api/admin/users", { headers });
-            }
-            
-            if (!usersData) {
-                console.log("Trying another alternative user endpoint...");
-                usersData = await safeFetch("http://localhost:8000/api/users", { headers });
-            }
+
+            const usersData = await safeFetch("http://localhost:8000/api/admin/users", { headers });
+
 
             if (usersData && Array.isArray(usersData)) {
                 console.log(`Found ${usersData.length} users`);
-                
+
                 // Process users data and calculate interview stats
                 const processedUsers = await Promise.all(usersData.map(async (user) => {
-                    console.log(`Processing user: ${user.fullname || user.name || user._id}`);
-                    
-                    // Fetch user's sessions/interviews - try multiple endpoints
-                    let userSessions = [];
-                    
-                    // Try different session endpoints
-                    const sessionEndpoints = [
-                        `http://localhost:8000/api/sessions?userId=${user._id}`,
-                        `http://localhost:8000/api/admin/users/${user._id}/sessions`,
-                        `http://localhost:8000/api/user/${user._id}/sessions`
-                    ];
-                    
-                    for (const endpoint of sessionEndpoints) {
-                        const sessionResponse = await safeFetch(endpoint, { headers });
-                        if (sessionResponse && Array.isArray(sessionResponse)) {
-                            userSessions = sessionResponse;
-                            console.log(`Found ${userSessions.length} sessions for user ${user._id}`);
-                            break;
-                        }
-                    }
 
-                    const totalInterviews = userSessions.length;
-                    const completedInterviews = userSessions.filter(session => 
+                    // Fetch user's sessions/interviews - try multiple endpoints
+                    let userSessions = user.sessions;
+
+                    const totalInterviews = userSessions?.length;
+                    const completedInterviews = userSessions?.filter(session =>
                         session.isComplete || session.status === 'completed'
                     ).length;
 
                     // Calculate average rating from coach feedback
-                    const ratingsWithFeedback = userSessions
-                        .filter(session => {
-                            const rating = session.coachFeedback?.rating || session.rating;
-                            return rating && !isNaN(rating);
-                        })
-                        .map(session => session.coachFeedback?.rating || session.rating);
+                    const ratingsWithFeedback = userSessions?.filter(session => {
+                        const rating = session.coachFeedback?.rating;
+                        return rating && !isNaN(rating);
+                    })
+                        .map(session => session.coachFeedback?.rating);
 
-                    const averageRating = ratingsWithFeedback.length > 0
+                    const averageRating = ratingsWithFeedback?.length > 0
                         ? (ratingsWithFeedback.reduce((sum, rating) => sum + rating, 0) / ratingsWithFeedback.length).toFixed(1)
                         : 0;
 
@@ -625,66 +584,14 @@ export default function AdminDashboard() {
 
             // Fetch all coaches
             console.log("Fetching all coaches...");
-            let coachesData = await safeFetch("http://localhost:8000/api/coaches", { headers });
-            
-            // Try alternative coach endpoint
-            if (!coachesData) {
-                coachesData = await safeFetch("http://localhost:8000/api/admin/coaches", { headers });
-            }
+            const coachesData = await safeFetch("http://localhost:8000/api/admin/coaches", { headers });
 
             if (coachesData && Array.isArray(coachesData)) {
                 console.log(`Found ${coachesData.length} coaches`);
-                
-                const processedCoaches = await Promise.all(coachesData.map(async (coach) => {
-                    // Calculate assigned users
-                    const assignedUsers = usersData ? usersData.filter(user => {
-                        const userCoachId = typeof user.coachId === 'object' ? user.coachId._id : user.coachId;
-                        return userCoachId === coach._id;
-                    }).length : 0;
 
-                    // Try to get coach's sessions for feedback stats
-                    let coachSessions = [];
-                    const coachSessionEndpoints = [
-                        `http://localhost:8000/api/sessions?coachId=${coach._id}`,
-                        `http://localhost:8000/api/admin/coaches/${coach._id}/sessions`
-                    ];
-                    
-                    for (const endpoint of coachSessionEndpoints) {
-                        const sessionResponse = await safeFetch(endpoint, { headers });
-                        if (sessionResponse && Array.isArray(sessionResponse)) {
-                            coachSessions = sessionResponse;
-                            break;
-                        }
-                    }
-
-                    // Calculate feedback stats
-                    const feedbackSessions = coachSessions.filter(session => 
-                        session.coachFeedback?.rating || session.rating
-                    );
-                    
-                    const totalFeedbacks = feedbackSessions.length;
-                    const averageRating = totalFeedbacks > 0 
-                        ? (feedbackSessions.reduce((sum, session) => 
-                            sum + (session.coachFeedback?.rating || session.rating), 0
-                        ) / totalFeedbacks).toFixed(1)
-                        : 0;
-
-                    return {
-                        ...coach,
-                        fullname: coach.fullname || coach.name || "Unknown Coach",
-                        email: coach.email || "No email",
-                        assignedUsers,
-                        totalFeedbacks,
-                        averageRating: parseFloat(averageRating),
-                        status: coach.isActive !== false ? "active" : "inactive",
-                        joinedAt: coach.createdAt,
-                        specialization: coach.specialization || coach.expertise || "General Coaching"
-                    };
-                }));
-
-                setCoaches(processedCoaches);
-                console.log(coaches);
-                console.log("Successfully processed coaches:", processedCoaches.length);
+                setCoaches(coachesData);
+                console.log(coaches)
+                console.log("Successfully processed coaches:", coachesData.length);
             } else {
                 console.warn("No coaches data received");
                 setCoaches([]);
@@ -693,35 +600,35 @@ export default function AdminDashboard() {
             // Fetch all interviews/sessions
             console.log("Fetching all interviews...");
             let interviewsData = await safeFetch("http://localhost:8000/api/sessions/all", { headers });
-            
+
             // Try alternative session endpoints
             if (!interviewsData) {
                 interviewsData = await safeFetch("http://localhost:8000/api/admin/sessions", { headers });
             }
-            
+
             if (!interviewsData) {
                 interviewsData = await safeFetch("http://localhost:8000/api/interviews", { headers });
             }
 
             if (interviewsData && Array.isArray(interviewsData)) {
                 console.log(`Found ${interviewsData.length} interviews`);
-                
+
                 const processedInterviews = interviewsData.map(interview => {
                     const duration = interview.completedAt && interview.createdAt
                         ? Math.round((new Date(interview.completedAt) - new Date(interview.createdAt)) / (1000 * 60))
                         : null;
 
                     // Handle user information
-                    const userName = interview.user?.fullname || 
-                                   interview.user?.name || 
-                                   interview.userName || 
-                                   "Unknown User";
+                    const userName = interview.user?.fullname ||
+                        interview.user?.name ||
+                        interview.userName ||
+                        "Unknown User";
 
                     // Handle coach information
-                    const coachName = interview.coach?.fullname || 
-                                    interview.coach?.name || 
-                                    interview.coachName || 
-                                    (interview.coachId ? "Coach" : "AI Assistant");
+                    const coachName = interview.coach?.fullname ||
+                        interview.coach?.name ||
+                        interview.coachName ||
+                        (interview.coachId ? "Coach" : "AI Assistant");
 
                     return {
                         _id: interview._id,
@@ -829,8 +736,8 @@ export default function AdminDashboard() {
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id)}
                                     className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors duration-200 text-sm font-medium ${activeTab === tab.id
-                                            ? "bg-indigo-600 text-white shadow-md"
-                                            : "text-slate-600 hover:bg-white/80"
+                                        ? "bg-indigo-600 text-white shadow-md"
+                                        : "text-slate-600 hover:bg-white/80"
                                         }`}
                                 >
                                     <Icon className="w-4 h-4" />
@@ -932,8 +839,8 @@ export default function AdminDashboard() {
                                 <div className="space-y-3">
                                     {[
                                         { type: "Technical", count: interviews.filter(i => i.type?.toLowerCase().includes('technical')).length, color: "blue" },
-                                        { type: "Behavioral", count: interviews.filter(i => i.type?.toLowerCase().includes('behavioral')).length, color: "green" },
-                                        { type: "General", count: interviews.filter(i => i.type?.toLowerCase().includes('general') || !i.type).length, color: "purple" }
+                                        { type: "Behavioral", count: interviews.filter(i => i.type?.toLowerCase().includes('behavioural')).length, color: "green" },
+                                        { type: "Mixed", count: interviews.filter(i => i.type?.toLowerCase().includes('hybrid')).length, color: "red" }
                                     ].map(({ type, count, color }) => {
                                         const percentage = stats.totalInterviews > 0 ? ((count / stats.totalInterviews) * 100).toFixed(0) : 0;
                                         return (
@@ -941,8 +848,8 @@ export default function AdminDashboard() {
                                                 <span className="text-sm text-slate-600">{type}</span>
                                                 <div className="flex items-center gap-2">
                                                     <div className="w-32 bg-slate-200 rounded-full h-2">
-                                                        <div 
-                                                            className={`bg-${color}-500 h-2 rounded-full`} 
+                                                        <div
+                                                            className={`bg-${color}-500 h-2 rounded-full`}
                                                             style={{ width: `${percentage}%` }}
                                                         ></div>
                                                     </div>
@@ -1006,10 +913,7 @@ export default function AdminDashboard() {
                                     className="pl-10 pr-4 py-2 w-full border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white/80 backdrop-blur-sm"
                                 />
                             </div>
-                            <button className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors duration-200">
-                                <Plus className="w-4 h-4" />
-                                Schedule Interview
-                            </button>
+                            
                         </div>
 
                         {interviews.map((interview, index) => (
@@ -1037,8 +941,8 @@ export default function AdminDashboard() {
                                             </p>
                                             <div className="flex items-center gap-2 mt-1">
                                                 <span className={`text-xs px-2 py-1 rounded-full font-medium ${interview.isComplete
-                                                        ? "bg-green-100 text-green-700"
-                                                        : "bg-orange-100 text-orange-700"
+                                                    ? "bg-green-100 text-green-700"
+                                                    : "bg-orange-100 text-orange-700"
                                                     }`}>
                                                     {interview.isComplete ? "Completed" : "In Progress"}
                                                 </span>
@@ -1066,15 +970,9 @@ export default function AdminDashboard() {
                                             </p>
                                         )}
                                         <div className="flex gap-2">
-                                            <button className="p-2 text-slate-600 hover:text-indigo-600 transition-colors duration-200">
+                                            <Link to={"/chat/session/"+interview._id} className="p-2 text-slate-600 hover:text-indigo-600 transition-colors duration-200">
                                                 <Eye className="w-4 h-4" />
-                                            </button>
-                                            <button className="p-2 text-slate-600 hover:text-green-600 transition-colors duration-200">
-                                                <Edit className="w-4 h-4" />
-                                            </button>
-                                            <button className="p-2 text-slate-600 hover:text-red-600 transition-colors duration-200">
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
+                                            </Link>
                                         </div>
                                     </div>
                                 </div>

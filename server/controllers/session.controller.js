@@ -7,11 +7,16 @@ const { cleanQuestion } = require('../utils/responseCleaner')
 
 module.exports.getAllSessions = async (req, res) => {
     try {
-        const sessions = await Session.find({}).sort({ createdAt: -1 });
+        console.log("Admin fetching all sessions...");
+        
+        // You'll need to replace this with your actual Session model
+        const sessions = await Session.find({})
+            .sort({ createdAt: -1 });
+        
         res.json(sessions);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "Server error fetching sessions." });
+    } catch (error) {
+        console.error("Error fetching sessions:", error);
+        res.status(500).json({ error: "Failed to fetch sessions" });
     }
 }
 module.exports.createSession = async (req, res) => {
@@ -53,7 +58,7 @@ module.exports.getSessionById = async (req, res) => {
         const session = await Session.findById(req.params.id);
         if (!session) return res.status(404).json({ error: "Session not found" });
 
-        if (session.userId.toString() === req.user.id) {
+        if (session.userId.toString() === req.user.id || req.user.role === "admin") {
             return res.json(session);
         }
 
