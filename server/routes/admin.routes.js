@@ -9,4 +9,6 @@ router.get('/users', verifyToken, requireRole(['admin']), adminController.getAll
 
 router.get('/coaches', verifyToken, requireRole(['admin']), adminController.getAllCoachesData)
 
+router.get('/coaching-requests', verifyToken, requireRole(['admin']), adminController.getAllCoachingRequests);
+
 module.exports = router;

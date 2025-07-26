@@ -42,6 +42,15 @@ module.exports.getAllUsersData = async (req, res) => {
     }
 };
 
+module.exports.getAllCoachingRequests = async (req, res) => {
+    try { const requests = await User.find({ coachingRequest: true, role: 'user' })
+        .select('-password')    
+        .sort({ createdAt: -1 });
+        res.json(requests);
+    } catch (error) {
+        console.error("Error fetching coaching requests:", error)}};
+    
+
 module.exports.getAllCoachesData = async (req, res) => {
     try {
         const coaches = await User.find({ role: 'coach' }).select('-password');
