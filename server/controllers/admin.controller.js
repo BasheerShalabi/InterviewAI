@@ -42,6 +42,15 @@ module.exports.getAllUsersData = async (req, res) => {
     }
 };
 
+module.exports.getAllCoachingRequests = async (req, res) => {
+    try { const requests = await User.find({ coachingRequest: true, role: 'user' })
+        .select('-password')    
+        .sort({ createdAt: -1 });
+        res.json(requests);
+    } catch (error) {
+        console.error("Error fetching coaching requests:", error)}};
+    
+
 module.exports.getAllCoachesData = async (req, res) => {
     try {
         const coaches = await User.find({ role: 'coach' }).select('-password');
@@ -88,4 +97,41 @@ module.exports.getAllCoachesData = async (req, res) => {
         console.error(err);
         res.status(500).json({ error: "Server error fetching coaches." });
     }
+}
+module.exports.acceptCoachingRequest = async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        // Find the user and update their role to 'coach'
+        const user = await User.findByIdAndUpdate(userId, { role: 'coach', coachingRequest: false }, { new: true });
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }       
+        // Optionally, you can also clear the pendingCoachRequest field
+        await User.findByIdAndUpdate(userId, { pendingCoachRequest: null }, {
+            runValidators: true
+        });
+        res.json({ message: "Coaching request accepted", user });
+    } catch (err) {
+        console.error("Error accepting coaching request:", err);    
+        res.status(500).json({ error: err.message });
+    }
+
+}
+ module.exports.declineCoachingRequest = async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        // Find the user and update their coachingRequest status
+        const user = await User.findByIdAndUpdate(userId, { coachingRequest: false, pendingCoachRequest: null }, { new: true });
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        res.json({ message: "Coaching request declined", user });
+    } catch (err) {
+        console.error("Error declining coaching request:", err);
+        res.status(500).json({ error: err.message });
+    }           
+
 }

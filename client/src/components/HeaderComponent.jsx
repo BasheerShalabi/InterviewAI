@@ -12,6 +12,7 @@ const HeaderComponent = (props) => {
     location.pathname.startsWith("/interview")
   
     const  hideDashboard = location.pathname.startsWith("/dashboard")
+
   return (
     <header className="bg-white/80 backdrop-blur-md border-b border-slate-200/50 sticky top-0 z-50 shadow-sm">
       <div className="max-w-6xl mx-auto px-6 py-4">
