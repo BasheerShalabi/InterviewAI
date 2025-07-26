@@ -17,7 +17,7 @@ app.use(express.urlencoded({ extended: true }));
 
 require('./config/mongoose.config');
 
-const ChatSocketHandler = require('./socketHandler');
+const ChatSocketHandler = require('./utils/socketHandler');
 const chatHandler = new ChatSocketHandler(server);
 
 app.use('/api/users', require('./routes/user.routes'));
