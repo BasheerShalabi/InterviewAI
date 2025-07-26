@@ -22,6 +22,7 @@ import { useAuth } from "../context/AuthContext";
 import FooterComponent from "../components/FooterComponent";
 import { Link } from "react-router-dom";
 import PopUpChat from "../components/PopUpChat";
+import { useAlert } from "../context/AlertContext";
 
 export default function UserDashboard() {
     const { user, logout } = useAuth();
@@ -38,6 +39,7 @@ export default function UserDashboard() {
     const [chatPartners, setChatPartners] = useState([]);
     const token = localStorage.getItem("session");
     const [count, setCount] = useState(0);
+    const {showAlert} = useAlert()
 
     const fetchUserData = async () => {
         try {
@@ -171,10 +173,10 @@ const sendRequest = async () => {
         );
 
         const data = await response.json();
-        alert(data.message);
+        showAlert(data.message , "info");
     } catch (error) {
         console.error("Error sending request:", error);
-        alert("Failed to send request. Please try again.");
+        showAlert("Failed to send request. Please try again." , "error");
     }
 };
 
@@ -219,9 +221,10 @@ const handleRequestCoach = async () => {
 
         setCoachRequested(true);
         setSelectedCoach("");
+        showAlert('Request sent' , "success")
     } catch (err) {
         console.error("Error sending request:", err);
-        alert("Failed to send coach request.");
+        showAlert("Failed to send coach request.","error");
         setCoachRequested(false);
     }
 };

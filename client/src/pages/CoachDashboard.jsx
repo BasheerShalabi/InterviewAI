@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import axios from 'axios';
 import LiveChat from "../components/LiveChat";
 import PopUpChat from "../components/PopUpChat";
+import { useAlert } from "../context/AlertContext";
 
 // LiveChat Component
 // const LiveChat = ({ user, chatPartners = [] }) => {
@@ -373,6 +374,7 @@ export default function CoachDashboard() {
     const [submittingFeedback, setSubmittingFeedback] = useState(false);
     const [activeTab, setActiveTab] = useState("requests");
     const [chatPartners, setChatPartners] = useState([]);
+    const {showAlert} = useAlert()
 
     const getToken = () => {
         try {
@@ -524,7 +526,7 @@ export default function CoachDashboard() {
     const handleAccept = async (userId) => {
         const token = getToken();
         if (!token) {
-            alert("Authentication token not found. Please log in again.");
+            showAlert("Authentication token not found. Please log in again.","error");
             return;
         }
 
@@ -558,14 +560,14 @@ export default function CoachDashboard() {
             }
         } catch (err) {
             console.error("Error accepting request:", err);
-            alert(`Failed to accept request: ${err.message}`);
+            showAlert(`Failed to accept request: ${err.message}` , "error");
         }
     };
 
     const handleRemoveUser = async (userId) => {
         const token = getToken();
         if (!token) {
-            alert("Authentication token not found. Please log in again.");
+            showAlert("Authentication token not found. Please log in again." , "error");
             return;
         }
 
@@ -585,10 +587,10 @@ export default function CoachDashboard() {
 
             setAssignedUsers((prev) => prev.filter((user) => user._id !== userId));
             setRemoveConfirmation(null);
-            alert("User removed successfully!");
+            showAlert("User removed successfully!","success");
         } catch (err) {
             console.error("Error removing user:", err);
-            alert(`Failed to remove user: ${err.message}`);
+            showAlert(`Failed to remove user: ${err.message}` , "error");
         } finally {
             setRemovingUser(null);
         }
@@ -596,13 +598,13 @@ export default function CoachDashboard() {
 
     const handleSubmitFeedback = async () => {
         if (!feedbackText.trim() || feedbackRating === 0) {
-            alert("Please provide both feedback text and rating.");
+            showAlert("Please provide both feedback text and rating." , "warning");
             return;
         }
 
         const token = getToken();
         if (!token) {
-            alert("Authentication token not found. Please log in again.");
+            showAlert("Authentication token not found. Please log in again." , "error");
             return;
         }
 
@@ -640,10 +642,10 @@ export default function CoachDashboard() {
             setFeedbackModal(null);
             setFeedbackText("");
             setFeedbackRating(0);
-            alert("Feedback submitted successfully!");
+            showAlert("Feedback submitted successfully!" , "success");
         } catch (err) {
             console.error("Error submitting feedback:", err);
-            alert(`Failed to submit feedback: ${err.message}`);
+            showAlert(`Failed to submit feedback: ${err.message}` , "error");
         } finally {
             setSubmittingFeedback(false);
         }
