@@ -9,7 +9,7 @@ const HeaderComponent = (props) => {
   const shouldHideButton =
     location.pathname.startsWith("/chat") ||
     location.pathname.startsWith("/result") ||
-    location.pathname.startsWith("/interview")
+    location.pathname.startsWith("/interview") || user.role === "coach";
   return (
     <header className="bg-white/80 backdrop-blur-md border-b border-slate-200/50 sticky top-0 z-50 shadow-sm">
       <div className="max-w-6xl mx-auto px-6 py-4">
