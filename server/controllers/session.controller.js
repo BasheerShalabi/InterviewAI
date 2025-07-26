@@ -19,7 +19,7 @@ module.exports.createSession = async (req, res) => {
         const { raw, numQuestions, type } = req.body;
         const userId = req.user.id;
 
-        const fetchedUser = await User.findOne({ userId })
+        const fetchedUser = await User.findOne({ _id:userId })
 
         const userName = fetchedUser.fullname
 
