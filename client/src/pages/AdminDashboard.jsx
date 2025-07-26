@@ -1,345 +1,1088 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import FooterComponent from '../components/FooterComponent';
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import {
     Users,
-    FileText,
+    UserCheck,
+    MessageCircle,
     TrendingUp,
-    Clock,
-    CheckCircle,
-    XCircle,
+    Calendar,
+    Award,
     Search,
     Filter,
-    Download,
     Eye,
-    Calendar
-} from 'lucide-react';
+    Edit,
+    Trash2,
+    Plus,
+    Download,
+    BarChart3,
+    PieChart,
+    Activity,
+    Clock,
+    CheckCircle,
+    AlertTriangle,
+    Star,
+    X,
+    Settings
+} from "lucide-react";
 
-export default function AdminDashboard() {
-    const [interviews, setInterviews] = useState([]);
-    const [stats, setStats] = useState({});
-    const [loading, setLoading] = useState(true);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [filterStatus, setFilterStatus] = useState('all');
+// Users Management Component
+const UsersManagement = ({ users, onRefresh }) => {
+    const [searchTerm, setSearchTerm] = useState("");
+    const [filterType, setFilterType] = useState("all");
+    const [selectedUser, setSelectedUser] = useState(null);
+    const [showModal, setShowModal] = useState(false);
 
-    useEffect(() => {
-        // Simulate loading dashboard data
-        setTimeout(() => {
-            setStats({
-                totalInterviews: 156,
-                completedInterviews: 142,
-                averageScore: 78,
-                topPerformers: 23
-            });
-
-            setInterviews([
-                {
-                    id: 1,
-                    candidateName: 'John Doe',
-                    position: 'Senior Frontend Developer',
-                    date: '2024-01-15',
-                    status: 'completed',
-                    score: 85,
-                    interviewer: 'Sarah Johnson'
-                },
-                {
-                    id: 2,
-                    candidateName: 'Jane Smith',
-                    position: 'Backend Developer',
-                    date: '2024-01-14',
-                    status: 'completed',
-                    score: 92,
-                    interviewer: 'Mike Chen'
-                },
-                {
-                    id: 3,
-                    candidateName: 'Alex Wilson',
-                    position: 'Full Stack Developer',
-                    date: '2024-01-13',
-                    status: 'in-progress',
-                    score: null,
-                    interviewer: 'Lisa Brown'
-                },
-                {
-                    id: 4,
-                    candidateName: 'Emily Davis',
-                    position: 'UI/UX Designer',
-                    date: '2024-01-12',
-                    status: 'scheduled',
-                    score: null,
-                    interviewer: 'Tom Anderson'
-                },
-                {
-                    id: 5,
-                    candidateName: 'David Miller',
-                    position: 'DevOps Engineer',
-                    date: '2024-01-11',
-                    status: 'completed',
-                    score: 76,
-                    interviewer: 'Sarah Johnson'
-                }
-            ]);
-
-            setLoading(false);
-        }, 1000);
-    }, []);
-
-    const filteredInterviews = interviews.filter(interview => {
-        const matchesSearch = interview.candidateName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            interview.position.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesFilter = filterStatus === 'all' || interview.status === filterStatus;
+    const filteredUsers = users.filter(user => {
+        const matchesSearch = user.fullname?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            user.email?.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesFilter = filterType === "all" ||
+            (filterType === "active" && user.status === "active") ||
+            (filterType === "inactive" && user.status === "inactive") ||
+            (filterType === "coached" && user.coachId) ||
+            (filterType === "uncoached" && !user.coachId);
         return matchesSearch && matchesFilter;
     });
 
-    const getStatusColor = (status) => {
-        switch (status) {
-            case 'completed':
-                return 'bg-green-100 text-green-700';
-            case 'in-progress':
-                return 'bg-blue-100 text-blue-700';
-            case 'scheduled':
-                return 'bg-yellow-100 text-yellow-700';
-            default:
-                return 'bg-gray-100 text-gray-700';
+    const openModal = (user = null) => {
+        setSelectedUser(user);
+        setShowModal(true);
+    };
+
+    const closeModal = () => {
+        setShowModal(false);
+        setSelectedUser(null);
+    };
+
+    return (
+        <div className="space-y-6">
+            {/* Search and Filter Bar */}
+            <div className="flex flex-col sm:flex-row gap-4">
+                <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                    <input
+                        type="text"
+                        placeholder="Search users..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10 pr-4 py-2 w-full border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white/80 backdrop-blur-sm"
+                    />
+                </div>
+                <select
+                    value={filterType}
+                    onChange={(e) => setFilterType(e.target.value)}
+                    className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white/80 backdrop-blur-sm"
+                >
+                    <option value="all">All Users</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                    <option value="coached">With Coach</option>
+                    <option value="uncoached">Without Coach</option>
+                </select>
+                <button
+                    onClick={() => openModal()}
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200"
+                >
+                    <Plus className="w-4 h-4" />
+                    Add User
+                </button>
+            </div>
+
+            {/* Users List */}
+            <div className="space-y-4">
+                {filteredUsers.map((user, index) => (
+                    <motion.div
+                        key={user._id}
+                        className="bg-white/80 backdrop-blur-xl shadow-lg rounded-xl p-6 border border-white/20"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 * index }}
+                    >
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <div className="bg-blue-100 p-3 rounded-full">
+                                    <Users className="w-6 h-6 text-blue-600" />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-semibold text-slate-800">{user.fullname}</h3>
+                                    <p className="text-sm text-slate-600">{user.email}</p>
+                                    <div className="flex items-center gap-4 mt-1">
+                                        <span className={`text-xs px-2 py-1 rounded-full font-medium ${user.status === "active"
+                                                ? "bg-green-100 text-green-700"
+                                                : "bg-red-100 text-red-700"
+                                            }`}>
+                                            {user.status}
+                                        </span>
+                                        {user.coachId && (
+                                            <span className="text-xs px-2 py-1 rounded-full font-medium bg-blue-100 text-blue-700">
+                                                Coached by {user.coachName || "Coach"}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="text-right">
+                                <div className="grid grid-cols-3 gap-4 mb-3">
+                                    <div className="text-center">
+                                        <p className="text-lg font-bold text-slate-800">{user.totalInterviews}</p>
+                                        <p className="text-xs text-slate-600">Total</p>
+                                    </div>
+                                    <div className="text-center">
+                                        <p className="text-lg font-bold text-green-600">{user.completedInterviews}</p>
+                                        <p className="text-xs text-slate-600">Completed</p>
+                                    </div>
+                                    <div className="text-center">
+                                        <div className="flex items-center gap-1 justify-center">
+                                            <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                                            <span className="text-lg font-bold text-slate-800">{user.averageRating}</span>
+                                        </div>
+                                        <p className="text-xs text-slate-600">Rating</p>
+                                    </div>
+                                </div>
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => openModal(user)}
+                                        className="p-2 text-slate-600 hover:text-indigo-600 transition-colors duration-200"
+                                    >
+                                        <Eye className="w-4 h-4" />
+                                    </button>
+                                    <button className="p-2 text-slate-600 hover:text-green-600 transition-colors duration-200">
+                                        <Edit className="w-4 h-4" />
+                                    </button>
+                                    <button className="p-2 text-slate-600 hover:text-red-600 transition-colors duration-200">
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </motion.div>
+                ))}
+            </div>
+
+            {/* User Modal */}
+            {showModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <motion.div
+                        className="bg-white rounded-2xl p-6 max-w-2xl w-full shadow-2xl max-h-[90vh] overflow-y-auto"
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
+                    >
+                        <div className="flex items-center justify-between mb-6">
+                            <h3 className="text-xl font-semibold text-slate-800">
+                                {selectedUser ? `User Details: ${selectedUser.fullname}` : 'Add New User'}
+                            </h3>
+                            <button
+                                onClick={closeModal}
+                                className="p-2 text-slate-400 hover:text-slate-600 transition-colors duration-200"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        {selectedUser && (
+                            <div className="space-y-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
+                                        <p className="text-slate-800">{selectedUser.fullname}</p>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                                        <p className="text-slate-800">{selectedUser.email}</p>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 mb-1">Status</label>
+                                        <span className={`text-xs px-2 py-1 rounded-full font-medium ${selectedUser.status === "active"
+                                                ? "bg-green-100 text-green-700"
+                                                : "bg-red-100 text-red-700"
+                                            }`}>
+                                            {selectedUser.status}
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 mb-1">Coach Status</label>
+                                        <span className={`text-xs px-2 py-1 rounded-full font-medium ${selectedUser.coachId
+                                                ? "bg-blue-100 text-blue-700"
+                                                : "bg-gray-100 text-gray-700"
+                                            }`}>
+                                            {selectedUser.coachId ? "Assigned" : "Unassigned"}
+                                        </span>
+                                    </div>
+                                </div>
+                                {selectedUser.coachName && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 mb-1">Coach Name</label>
+                                        <p className="text-slate-800">{selectedUser.coachName}</p>
+                                    </div>
+                                )}
+                                <div className="grid grid-cols-3 gap-4">
+                                    <div className="text-center p-4 bg-slate-50 rounded-lg">
+                                        <p className="text-2xl font-bold text-slate-800">{selectedUser.totalInterviews}</p>
+                                        <p className="text-sm text-slate-600">Total Interviews</p>
+                                    </div>
+                                    <div className="text-center p-4 bg-green-50 rounded-lg">
+                                        <p className="text-2xl font-bold text-green-600">{selectedUser.completedInterviews}</p>
+                                        <p className="text-sm text-slate-600">Completed</p>
+                                    </div>
+                                    <div className="text-center p-4 bg-yellow-50 rounded-lg">
+                                        <div className="flex items-center justify-center gap-1">
+                                            <Star className="w-5 h-5 text-yellow-400 fill-current" />
+                                            <span className="text-2xl font-bold text-slate-800">{selectedUser.averageRating}</span>
+                                        </div>
+                                        <p className="text-sm text-slate-600">Average Rating</p>
+                                    </div>
+                                </div>
+                                {selectedUser.sessions && selectedUser.sessions.length > 0 && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 mb-2">Recent Sessions</label>
+                                        <div className="space-y-2 max-h-40 overflow-y-auto">
+                                            {selectedUser.sessions.slice(0, 5).map((session, index) => (
+                                                <div key={index} className="p-3 bg-slate-50 rounded-lg">
+                                                    <div className="flex justify-between items-center">
+                                                        <span className="text-sm font-medium">
+                                                            {session.type || "General"} Interview
+                                                        </span>
+                                                        <span className={`text-xs px-2 py-1 rounded-full ${session.isComplete 
+                                                            ? 'bg-green-100 text-green-700' 
+                                                            : 'bg-orange-100 text-orange-700'
+                                                        }`}>
+                                                            {session.isComplete ? 'Completed' : 'In Progress'}
+                                                        </span>
+                                                    </div>
+                                                    <p className="text-xs text-slate-600">
+                                                        {new Date(session.createdAt).toLocaleDateString()}
+                                                    </p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        <div className="flex justify-end gap-3 mt-6">
+                            <button
+                                onClick={closeModal}
+                                className="px-4 py-2 text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors duration-200"
+                            >
+                                Close
+                            </button>
+                            <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200">
+                                Edit
+                            </button>
+                        </div>
+                    </motion.div>
+                </div>
+            )}
+        </div>
+    );
+};
+
+// Coaches Management Component
+const CoachesManagement = ({ coaches, onRefresh }) => {
+    const [searchTerm, setSearchTerm] = useState("");
+    const [selectedCoach, setSelectedCoach] = useState(null);
+    const [showModal, setShowModal] = useState(false);
+
+    console.log(coaches);
+
+    const filteredCoaches = coaches.filter(coach => {
+        const matchesSearch = coach.fullname?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            coach.email?.toLowerCase().includes(searchTerm.toLowerCase()) || coach.role == "coach";
+        return matchesSearch;
+    });
+
+    const openModal = (coach = null) => {
+        setSelectedCoach(coach);
+        setShowModal(true);
+    };
+
+    const closeModal = () => {
+        setShowModal(false);
+        setSelectedCoach(null);
+    };
+
+    return (
+        <div className="space-y-6">
+            {/* Search and Add Bar */}
+            <div className="flex flex-col sm:flex-row gap-4">
+                <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                    <input
+                        type="text"
+                        placeholder="Search coaches..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10 pr-4 py-2 w-full border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white/80 backdrop-blur-sm"
+                    />
+                </div>
+                <button
+                    onClick={() => openModal()}
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200"
+                >
+                    <Plus className="w-4 h-4" />
+                    Add Coach
+                </button>
+            </div>
+
+            {/* Coaches List */}
+            <div className="space-y-4">
+                {filteredCoaches.map((coach, index) => (
+                    <motion.div
+                        key={coach._id}
+                        className="bg-white/80 backdrop-blur-xl shadow-lg rounded-xl p-6 border border-white/20"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 * index }}
+                    >
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <div className="bg-green-100 p-3 rounded-full">
+                                    <UserCheck className="w-6 h-6 text-green-600" />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-semibold text-slate-800">{coach.fullname}</h3>
+                                    <p className="text-sm text-slate-600">{coach.email}</p>
+                                    <p className="text-sm text-indigo-600 font-medium">{coach.specialization}</p>
+                                    <span className={`text-xs px-2 py-1 rounded-full font-medium mt-1 inline-block ${coach.status === "active"
+                                            ? "bg-green-100 text-green-700"
+                                            : "bg-red-100 text-red-700"
+                                        }`}>
+                                        {coach.status}
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="text-right">
+                                <div className="grid grid-cols-3 gap-4 mb-3">
+                                    <div className="text-center">
+                                        <p className="text-lg font-bold text-slate-800">{coach.assignedUsers}</p>
+                                        <p className="text-xs text-slate-600">Users</p>
+                                    </div>
+                                    <div className="text-center">
+                                        <p className="text-lg font-bold text-blue-600">{coach.totalFeedbacks}</p>
+                                        <p className="text-xs text-slate-600">Feedbacks</p>
+                                    </div>
+                                    <div className="text-center">
+                                        <div className="flex items-center gap-1 justify-center">
+                                            <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                                            <span className="text-lg font-bold text-slate-800">{coach.averageRating}</span>
+                                        </div>
+                                        <p className="text-xs text-slate-600">Rating</p>
+                                    </div>
+                                </div>
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => openModal(coach)}
+                                        className="p-2 text-slate-600 hover:text-indigo-600 transition-colors duration-200"
+                                    >
+                                        <Eye className="w-4 h-4" />
+                                    </button>
+                                    <button className="p-2 text-slate-600 hover:text-green-600 transition-colors duration-200">
+                                        <Edit className="w-4 h-4" />
+                                    </button>
+                                    <button className="p-2 text-slate-600 hover:text-red-600 transition-colors duration-200">
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </motion.div>
+                ))}
+            </div>
+
+            {/* Coach Modal */}
+            {showModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <motion.div
+                        className="bg-white rounded-2xl p-6 max-w-2xl w-full shadow-2xl max-h-[90vh] overflow-y-auto"
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
+                    >
+                        <div className="flex items-center justify-between mb-6">
+                            <h3 className="text-xl font-semibold text-slate-800">
+                                {selectedCoach ? `Coach Details: ${selectedCoach.fullname}` : 'Add New Coach'}
+                            </h3>
+                            <button
+                                onClick={closeModal}
+                                className="p-2 text-slate-400 hover:text-slate-600 transition-colors duration-200"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        {selectedCoach && (
+                            <div className="space-y-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
+                                        <p className="text-slate-800">{selectedCoach.fullname}</p>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                                        <p className="text-slate-800">{selectedCoach.email}</p>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 mb-1">Specialization</label>
+                                        <p className="text-indigo-600 font-medium">{selectedCoach.specialization}</p>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 mb-1">Status</label>
+                                        <span className={`text-xs px-2 py-1 rounded-full font-medium ${selectedCoach.status === "active"
+                                                ? "bg-green-100 text-green-700"
+                                                : "bg-red-100 text-red-700"
+                                            }`}>
+                                            {selectedCoach.status}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-3 gap-4">
+                                    <div className="text-center p-4 bg-blue-50 rounded-lg">
+                                        <p className="text-2xl font-bold text-blue-600">{selectedCoach.assignedUsers}</p>
+                                        <p className="text-sm text-slate-600">Assigned Users</p>
+                                    </div>
+                                    <div className="text-center p-4 bg-purple-50 rounded-lg">
+                                        <p className="text-2xl font-bold text-purple-600">{selectedCoach.totalFeedbacks}</p>
+                                        <p className="text-sm text-slate-600">Total Feedbacks</p>
+                                    </div>
+                                    <div className="text-center p-4 bg-yellow-50 rounded-lg">
+                                        <div className="flex items-center justify-center gap-1">
+                                            <Star className="w-5 h-5 text-yellow-400 fill-current" />
+                                            <span className="text-2xl font-bold text-slate-800">{selectedCoach.averageRating}</span>
+                                        </div>
+                                        <p className="text-sm text-slate-600">Average Rating</p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="flex justify-end gap-3 mt-6">
+                            <button
+                                onClick={closeModal}
+                                className="px-4 py-2 text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors duration-200"
+                            >
+                                Close
+                            </button>
+                            <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200">
+                                Edit
+                            </button>
+                        </div>
+                    </motion.div>
+                </div>
+            )}
+        </div>
+    );
+};
+
+export default function AdminDashboard() {
+    const [activeTab, setActiveTab] = useState("overview");
+    const [users, setUsers] = useState([]);
+    const [coaches, setCoaches] = useState([]);
+    const [interviews, setInterviews] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [searchTerm, setSearchTerm] = useState("");
+
+    // Safe fetch function with error handling
+    const safeFetch = async (url, options = {}) => {
+        try {
+            console.log(`Making request to: ${url}`);
+            const response = await fetch(url, options);
+            
+            if (!response.ok) {
+                console.error(`HTTP ${response.status}: ${response.statusText} for ${url}`);
+                return null;
+            }
+            
+            const data = await response.json();
+            console.log(`Successfully fetched from ${url}:`, data);
+            return data;
+        } catch (error) {
+            console.error(`Network error for ${url}:`, error);
+            return null;
         }
     };
 
-    const getScoreColor = (score) => {
-        if (score >= 85) return 'text-green-600';
-        if (score >= 70) return 'text-yellow-600';
-        return 'text-red-600';
+    // Get authentication token
+    const getToken = () => {
+        try {
+            return localStorage.getItem("session") || localStorage.getItem("token") || localStorage.getItem("authToken");
+        } catch (error) {
+            console.warn("Error accessing localStorage:", error);
+            return null;
+        }
     };
 
+    // Fetch data from API
+    const fetchData = async () => {
+        const token = getToken();
+        
+        if (!token) {
+            setError("No authentication token found. Please log in again.");
+            setLoading(false);
+            return;
+        }
+
+        const headers = {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+        };
+
+        try {
+            setError(null);
+            setLoading(true);
+
+            // Fetch all users - try different endpoints
+            console.log("Fetching all users...");
+            let usersData = await safeFetch("http://localhost:8000/api/user", { headers });
+            
+            // If /api/user doesn't work, try alternatives
+            if (!usersData) {
+                console.log("Trying alternative user endpoint...");
+                usersData = await safeFetch("http://localhost:8000/api/admin/users", { headers });
+            }
+            
+            if (!usersData) {
+                console.log("Trying another alternative user endpoint...");
+                usersData = await safeFetch("http://localhost:8000/api/users", { headers });
+            }
+
+            if (usersData && Array.isArray(usersData)) {
+                console.log(`Found ${usersData.length} users`);
+                
+                // Process users data and calculate interview stats
+                const processedUsers = await Promise.all(usersData.map(async (user) => {
+                    console.log(`Processing user: ${user.fullname || user.name || user._id}`);
+                    
+                    // Fetch user's sessions/interviews - try multiple endpoints
+                    let userSessions = [];
+                    
+                    // Try different session endpoints
+                    const sessionEndpoints = [
+                        `http://localhost:8000/api/sessions?userId=${user._id}`,
+                        `http://localhost:8000/api/admin/users/${user._id}/sessions`,
+                        `http://localhost:8000/api/user/${user._id}/sessions`
+                    ];
+                    
+                    for (const endpoint of sessionEndpoints) {
+                        const sessionResponse = await safeFetch(endpoint, { headers });
+                        if (sessionResponse && Array.isArray(sessionResponse)) {
+                            userSessions = sessionResponse;
+                            console.log(`Found ${userSessions.length} sessions for user ${user._id}`);
+                            break;
+                        }
+                    }
+
+                    const totalInterviews = userSessions.length;
+                    const completedInterviews = userSessions.filter(session => 
+                        session.isComplete || session.status === 'completed'
+                    ).length;
+
+                    // Calculate average rating from coach feedback
+                    const ratingsWithFeedback = userSessions
+                        .filter(session => {
+                            const rating = session.coachFeedback?.rating || session.rating;
+                            return rating && !isNaN(rating);
+                        })
+                        .map(session => session.coachFeedback?.rating || session.rating);
+
+                    const averageRating = ratingsWithFeedback.length > 0
+                        ? (ratingsWithFeedback.reduce((sum, rating) => sum + rating, 0) / ratingsWithFeedback.length).toFixed(1)
+                        : 0;
+
+                    // Handle coach information
+                    let coachName = null;
+                    if (user.coachId) {
+                        if (typeof user.coachId === 'object' && user.coachId.fullname) {
+                            coachName = user.coachId.fullname;
+                        } else if (typeof user.coachId === 'string') {
+                            // Try to fetch coach details
+                            const coachData = await safeFetch(`http://localhost:8000/api/coaches/${user.coachId}`, { headers });
+                            coachName = coachData?.fullname || coachData?.name || "Unknown Coach";
+                        }
+                    }
+
+                    return {
+                        ...user,
+                        fullname: user.fullname || user.name || "Unknown User",
+                        email: user.email || "No email",
+                        totalInterviews,
+                        completedInterviews,
+                        averageRating: parseFloat(averageRating),
+                        status: user.isActive !== false ? "active" : "inactive",
+                        lastActive: user.lastLoginAt || user.updatedAt || user.createdAt,
+                        coachName,
+                        sessions: userSessions // Store sessions for detailed view
+                    };
+                }));
+
+                setUsers(processedUsers);
+                console.log("Successfully processed users:", processedUsers.length);
+            } else {
+                console.warn("No users data received or data is not an array");
+                setUsers([]);
+            }
+
+            // Fetch all coaches
+            console.log("Fetching all coaches...");
+            let coachesData = await safeFetch("http://localhost:8000/api/coaches", { headers });
+            
+            // Try alternative coach endpoint
+            if (!coachesData) {
+                coachesData = await safeFetch("http://localhost:8000/api/admin/coaches", { headers });
+            }
+
+            if (coachesData && Array.isArray(coachesData)) {
+                console.log(`Found ${coachesData.length} coaches`);
+                
+                const processedCoaches = await Promise.all(coachesData.map(async (coach) => {
+                    // Calculate assigned users
+                    const assignedUsers = usersData ? usersData.filter(user => {
+                        const userCoachId = typeof user.coachId === 'object' ? user.coachId._id : user.coachId;
+                        return userCoachId === coach._id;
+                    }).length : 0;
+
+                    // Try to get coach's sessions for feedback stats
+                    let coachSessions = [];
+                    const coachSessionEndpoints = [
+                        `http://localhost:8000/api/sessions?coachId=${coach._id}`,
+                        `http://localhost:8000/api/admin/coaches/${coach._id}/sessions`
+                    ];
+                    
+                    for (const endpoint of coachSessionEndpoints) {
+                        const sessionResponse = await safeFetch(endpoint, { headers });
+                        if (sessionResponse && Array.isArray(sessionResponse)) {
+                            coachSessions = sessionResponse;
+                            break;
+                        }
+                    }
+
+                    // Calculate feedback stats
+                    const feedbackSessions = coachSessions.filter(session => 
+                        session.coachFeedback?.rating || session.rating
+                    );
+                    
+                    const totalFeedbacks = feedbackSessions.length;
+                    const averageRating = totalFeedbacks > 0 
+                        ? (feedbackSessions.reduce((sum, session) => 
+                            sum + (session.coachFeedback?.rating || session.rating), 0
+                        ) / totalFeedbacks).toFixed(1)
+                        : 0;
+
+                    return {
+                        ...coach,
+                        fullname: coach.fullname || coach.name || "Unknown Coach",
+                        email: coach.email || "No email",
+                        assignedUsers,
+                        totalFeedbacks,
+                        averageRating: parseFloat(averageRating),
+                        status: coach.isActive !== false ? "active" : "inactive",
+                        joinedAt: coach.createdAt,
+                        specialization: coach.specialization || coach.expertise || "General Coaching"
+                    };
+                }));
+
+                setCoaches(processedCoaches);
+                console.log(coaches);
+                console.log("Successfully processed coaches:", processedCoaches.length);
+            } else {
+                console.warn("No coaches data received");
+                setCoaches([]);
+            }
+
+            // Fetch all interviews/sessions
+            console.log("Fetching all interviews...");
+            let interviewsData = await safeFetch("http://localhost:8000/api/sessions/all", { headers });
+            
+            // Try alternative session endpoints
+            if (!interviewsData) {
+                interviewsData = await safeFetch("http://localhost:8000/api/admin/sessions", { headers });
+            }
+            
+            if (!interviewsData) {
+                interviewsData = await safeFetch("http://localhost:8000/api/interviews", { headers });
+            }
+
+            if (interviewsData && Array.isArray(interviewsData)) {
+                console.log(`Found ${interviewsData.length} interviews`);
+                
+                const processedInterviews = interviewsData.map(interview => {
+                    const duration = interview.completedAt && interview.createdAt
+                        ? Math.round((new Date(interview.completedAt) - new Date(interview.createdAt)) / (1000 * 60))
+                        : null;
+
+                    // Handle user information
+                    const userName = interview.user?.fullname || 
+                                   interview.user?.name || 
+                                   interview.userName || 
+                                   "Unknown User";
+
+                    // Handle coach information
+                    const coachName = interview.coach?.fullname || 
+                                    interview.coach?.name || 
+                                    interview.coachName || 
+                                    (interview.coachId ? "Coach" : "AI Assistant");
+
+                    return {
+                        _id: interview._id,
+                        userId: interview.user?._id || interview.userId,
+                        userName,
+                        coachId: interview.coach?._id || interview.coachId,
+                        coachName,
+                        type: interview.type || interview.interviewType || "General",
+                        isComplete: interview.isComplete || interview.status === 'completed',
+                        rating: interview.coachFeedback?.rating || interview.rating || null,
+                        createdAt: interview.createdAt,
+                        completedAt: interview.completedAt,
+                        duration,
+                        status: interview.status || (interview.isComplete ? 'completed' : 'in-progress')
+                    };
+                });
+
+                setInterviews(processedInterviews);
+                console.log("Successfully processed interviews:", processedInterviews.length);
+            } else {
+                console.warn("No interviews data received");
+                setInterviews([]);
+            }
+
+        } catch (error) {
+            console.error("Error in fetchData:", error);
+            setError(`Failed to load dashboard data: ${error.message}`);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Fetch data on component mount
+    useEffect(() => {
+        fetchData();
+    }, []);[users, coaches, interviews];
+
+    // Calculate statistics
+    const stats = {
+        totalUsers: users.length,
+        activeUsers: users.filter(u => u.status === "active").length,
+        totalCoaches: coaches.length,
+        activeCoaches: coaches.filter(c => c.status === "active").length,
+        totalInterviews: interviews.length,
+        completedInterviews: interviews.filter(i => i.isComplete).length,
+        averageCompletionRate: users.length > 0 ?
+            (users.reduce((sum, u) => sum + (u.completedInterviews / (u.totalInterviews || 1)), 0) / users.length * 100).toFixed(1) : 0,
+        averageUserRating: users.length > 0 ?
+            (users.reduce((sum, u) => sum + (u.averageRating || 0), 0) / users.length).toFixed(1) : 0
+    };
+
+
+    // Loading display
     if (loading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center">
-                <motion.div
-                    className="text-center"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                >
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-indigo-100">
+                <motion.div className="text-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                     <motion.div
-                        className="w-16 h-16 border-4 border-slate-200 border-t-slate-600 rounded-full mx-auto mb-4"
+                        className="w-16 h-16 border-4 border-slate-300 border-t-indigo-600 rounded-full mx-auto mb-4"
                         animate={{ rotate: 360 }}
                         transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                     />
-                    <p className="text-slate-600">Loading dashboard...</p>
+                    <p className="text-slate-600">Loading admin dashboard...</p>
                 </motion.div>
             </div>
         );
     }
 
     return (
-            <>
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-100">
+            {/* Header */}
+            <div className="bg-white/80 backdrop-blur-xl shadow-lg border-b border-white/20">
+                <div className="max-w-7xl mx-auto px-6 py-4">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h1 className="text-2xl font-bold text-slate-800">Admin Dashboard</h1>
+                            <p className="text-slate-600">Manage users, coaches, and interview analytics</p>
+                        </div>
+                        <div className="flex items-center gap-4">
+                            <button className="p-2 text-slate-600 hover:text-indigo-600 transition-colors duration-200">
+                                <Settings className="w-5 h-5" />
+                            </button>
+                            <button className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200">
+                                <Download className="w-4 h-4" />
+                                Export Data
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-6">
-            <div className="max-w-7xl mx-auto">
-                {/* Header */}
-                <motion.div
-                    className="mb-8"
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                >
-                    <h1 className="text-3xl font-bold text-slate-800 mb-2">Admin Dashboard</h1>
-                    <p className="text-slate-600">Monitor and manage all interview activities</p>
-                </motion.div>
-
-                {/* Stats Cards */}
-                <div className="grid md:grid-cols-4 gap-6 mb-8">
-                    {[
-                        {
-                            title: 'Total Interviews',
-                            value: stats.totalInterviews,
-                            icon: FileText,
-                            color: 'from-blue-500 to-blue-600',
-                            change: '+12%'
-                        },
-                        {
-                            title: 'Completed',
-                            value: stats.completedInterviews,
-                            icon: CheckCircle,
-                            color: 'from-green-500 to-green-600',
-                            change: '+8%'
-                        },
-                        {
-                            title: 'Average Score',
-                            value: `${stats.averageScore}%`,
-                            icon: TrendingUp,
-                            color: 'from-purple-500 to-purple-600',
-                            change: '+3%'
-                        },
-                        {
-                            title: 'Top Performers',
-                            value: stats.topPerformers,
-                            icon: Users,
-                            color: 'from-orange-500 to-orange-600',
-                            change: '+15%'
-                        }
-                    ].map((stat, index) => (
-                        <motion.div
-                            key={index}
-                            className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg border border-white/20 p-6"
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.1 * index }}
-                        >
-                            <div className="flex items-center justify-between mb-4">
-                                <div className={`p-3 bg-gradient-to-r ${stat.color} rounded-xl shadow-lg`}>
-                                    <stat.icon className="w-6 h-6 text-white" />
-                                </div>
-                                <span className="text-sm font-medium text-green-600">{stat.change}</span>
-                            </div>
-                            <h3 className="text-2xl font-bold text-slate-800 mb-1">{stat.value}</h3>
-                            <p className="text-slate-600 text-sm">{stat.title}</p>
-                        </motion.div>
-                    ))}
+            <div className="max-w-7xl mx-auto p-6">
+                {/* Tab Navigation */}
+                <div className="mb-8">
+                    <div className="flex gap-2 bg-white/60 backdrop-blur-sm rounded-xl p-2 border border-white/20">
+                        {[
+                            { id: "overview", label: "Overview", icon: BarChart3 },
+                            { id: "users", label: "Users", icon: Users },
+                            { id: "coaches", label: "Coaches", icon: UserCheck },
+                            { id: "interviews", label: "Interviews", icon: MessageCircle }
+                        ].map((tab) => {
+                            const Icon = tab.icon;
+                            return (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => setActiveTab(tab.id)}
+                                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors duration-200 text-sm font-medium ${activeTab === tab.id
+                                            ? "bg-indigo-600 text-white shadow-md"
+                                            : "text-slate-600 hover:bg-white/80"
+                                        }`}
+                                >
+                                    <Icon className="w-4 h-4" />
+                                    {tab.label}
+                                </button>
+                            );
+                        })}
+                    </div>
                 </div>
 
-                {/* Interviews Table */}
-                <motion.div
-                    className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 overflow-hidden"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4 }}
-                >
-                    {/* Table Header */}
-                    <div className="p-6 border-b border-slate-200/50">
-                        <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-xl font-semibold text-slate-800">Recent Interviews</h2>
-                            <div className="flex gap-3">
-                                <motion.button
-                                    className="flex items-center gap-2 px-4 py-2 border border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 transition-all duration-300"
-                                    whileHover={{ scale: 1.02 }}
-                                    whileTap={{ scale: 0.98 }}
-                                >
-                                    <Download className="w-4 h-4" />
-                                    Export
-                                </motion.button>
-                                <motion.button
-                                    className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-xl hover:bg-slate-700 transition-all duration-300"
-                                    whileHover={{ scale: 1.02 }}
-                                    whileTap={{ scale: 0.98 }}
-                                >
-                                    <Calendar className="w-4 h-4" />
-                                    Schedule New
-                                </motion.button>
-                            </div>
+                {/* Overview Stats */}
+                {activeTab === "overview" && (
+                    <>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                            <motion.div
+                                className="bg-white/80 backdrop-blur-xl shadow-xl rounded-2xl p-6 border border-white/20"
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                            >
+                                <div className="flex items-center gap-4">
+                                    <div className="bg-blue-100 p-3 rounded-full">
+                                        <Users className="w-8 h-8 text-blue-600" />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-slate-600">Total Users</p>
+                                        <p className="text-2xl font-bold text-slate-800">{stats.totalUsers}</p>
+                                        <p className="text-xs text-green-600">{stats.activeUsers} active</p>
+                                    </div>
+                                </div>
+                            </motion.div>
+
+                            <motion.div
+                                className="bg-white/80 backdrop-blur-xl shadow-xl rounded-2xl p-6 border border-white/20"
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.1 }}
+                            >
+                                <div className="flex items-center gap-4">
+                                    <div className="bg-green-100 p-3 rounded-full">
+                                        <UserCheck className="w-8 h-8 text-green-600" />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-slate-600">Total Coaches</p>
+                                        <p className="text-2xl font-bold text-slate-800">{stats.totalCoaches}</p>
+                                        <p className="text-xs text-green-600">{stats.activeCoaches} active</p>
+                                    </div>
+                                </div>
+                            </motion.div>
+
+                            <motion.div
+                                className="bg-white/80 backdrop-blur-xl shadow-xl rounded-2xl p-6 border border-white/20"
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.2 }}
+                            >
+                                <div className="flex items-center gap-4">
+                                    <div className="bg-purple-100 p-3 rounded-full">
+                                        <MessageCircle className="w-8 h-8 text-purple-600" />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-slate-600">Total Interviews</p>
+                                        <p className="text-2xl font-bold text-slate-800">{stats.totalInterviews}</p>
+                                        <p className="text-xs text-green-600">{stats.completedInterviews} completed</p>
+                                    </div>
+                                </div>
+                            </motion.div>
+
+                            <motion.div
+                                className="bg-white/80 backdrop-blur-xl shadow-xl rounded-2xl p-6 border border-white/20"
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.3 }}
+                            >
+                                <div className="flex items-center gap-4">
+                                    <div className="bg-orange-100 p-3 rounded-full">
+                                        <TrendingUp className="w-8 h-8 text-orange-600" />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-slate-600">Completion Rate</p>
+                                        <p className="text-2xl font-bold text-slate-800">{stats.averageCompletionRate}%</p>
+                                        <p className="text-xs text-slate-600">Average rating: {stats.averageUserRating}</p>
+                                    </div>
+                                </div>
+                            </motion.div>
                         </div>
 
-                        {/* Search and Filter */}
-                        <div className="flex gap-4">
-                            <div className="flex-1 relative">
-                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+                        {/* Charts Section */}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                            <motion.div
+                                className="bg-white/80 backdrop-blur-xl shadow-xl rounded-2xl p-6 border border-white/20"
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.4 }}
+                            >
+                                <div className="flex items-center gap-3 mb-4">
+                                    <BarChart3 className="w-6 h-6 text-indigo-600" />
+                                    <h3 className="text-lg font-semibold text-slate-800">Interview Distribution</h3>
+                                </div>
+                                <div className="space-y-3">
+                                    {[
+                                        { type: "Technical", count: interviews.filter(i => i.type?.toLowerCase().includes('technical')).length, color: "blue" },
+                                        { type: "Behavioral", count: interviews.filter(i => i.type?.toLowerCase().includes('behavioral')).length, color: "green" },
+                                        { type: "General", count: interviews.filter(i => i.type?.toLowerCase().includes('general') || !i.type).length, color: "purple" }
+                                    ].map(({ type, count, color }) => {
+                                        const percentage = stats.totalInterviews > 0 ? ((count / stats.totalInterviews) * 100).toFixed(0) : 0;
+                                        return (
+                                            <div key={type} className="flex items-center justify-between">
+                                                <span className="text-sm text-slate-600">{type}</span>
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-32 bg-slate-200 rounded-full h-2">
+                                                        <div 
+                                                            className={`bg-${color}-500 h-2 rounded-full`} 
+                                                            style={{ width: `${percentage}%` }}
+                                                        ></div>
+                                                    </div>
+                                                    <span className="text-sm font-medium">{percentage}%</span>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </motion.div>
+
+                            <motion.div
+                                className="bg-white/80 backdrop-blur-xl shadow-xl rounded-2xl p-6 border border-white/20"
+                                initial={{ opacity: 0, x: 10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.5 }}
+                            >
+                                <div className="flex items-center gap-3 mb-4">
+                                    <Activity className="w-6 h-6 text-green-600" />
+                                    <h3 className="text-lg font-semibold text-slate-800">Recent Activity</h3>
+                                </div>
+                                <div className="space-y-3">
+                                    {interviews.slice(0, 3).map((interview, index) => (
+                                        <div key={interview._id} className="flex items-center gap-3">
+                                            <div className={`w-2 h-2 ${interview.isComplete ? 'bg-green-500' : 'bg-orange-500'} rounded-full`}></div>
+                                            <span className="text-sm text-slate-600">
+                                                {interview.userName} {interview.isComplete ? 'completed' : 'started'} an interview
+                                            </span>
+                                            <span className="text-xs text-slate-400">
+                                                {new Date(interview.createdAt).toLocaleDateString()}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </motion.div>
+                        </div>
+                    </>
+                )}
+
+                {/* Users Tab */}
+                {activeTab === "users" && (
+                    <UsersManagement users={users} onRefresh={fetchData} />
+                )}
+
+                {/* Coaches Tab */}
+                {activeTab === "coaches" && (
+                    <CoachesManagement coaches={coaches} onRefresh={fetchData} />
+                )}
+
+                {/* Interviews Tab */}
+                {activeTab === "interviews" && (
+                    <div className="space-y-4">
+                        <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                            <div className="relative flex-1">
+                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
                                 <input
                                     type="text"
-                                    placeholder="Search candidates or positions..."
+                                    placeholder="Search interviews..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all duration-300 bg-white/50 backdrop-blur-sm"
+                                    className="pl-10 pr-4 py-2 w-full border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white/80 backdrop-blur-sm"
                                 />
                             </div>
-                            <div className="relative">
-                                <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
-                                <select
-                                    value={filterStatus}
-                                    onChange={(e) => setFilterStatus(e.target.value)}
-                                    className="pl-10 pr-8 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all duration-300 bg-white/50 backdrop-blur-sm"
-                                >
-                                    <option value="all">All Status</option>
-                                    <option value="completed">Completed</option>
-                                    <option value="in-progress">In Progress</option>
-                                    <option value="scheduled">Scheduled</option>
-                                </select>
-                            </div>
+                            <button className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors duration-200">
+                                <Plus className="w-4 h-4" />
+                                Schedule Interview
+                            </button>
                         </div>
-                    </div>
 
-                    {/* Table Content */}
-                    <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead className="bg-slate-50/50">
-                                <tr>
-                                    <th className="px-6 py-4 text-left text-sm font-medium text-slate-700">Candidate</th>
-                                    <th className="px-6 py-4 text-left text-sm font-medium text-slate-700">Position</th>
-                                    <th className="px-6 py-4 text-left text-sm font-medium text-slate-700">Date</th>
-                                    <th className="px-6 py-4 text-left text-sm font-medium text-slate-700">Status</th>
-                                    <th className="px-6 py-4 text-left text-sm font-medium text-slate-700">Score</th>
-                                    <th className="px-6 py-4 text-left text-sm font-medium text-slate-700">Interviewer</th>
-                                    <th className="px-6 py-4 text-left text-sm font-medium text-slate-700">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-200/50">
-                                {filteredInterviews.map((interview, index) => (
-                                    <motion.tr
-                                        key={interview.id}
-                                        className="hover:bg-slate-50/50 transition-colors duration-200"
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: 0.05 * index }}
-                                    >
-                                        <td className="px-6 py-4">
-                                            <div className="font-medium text-slate-800">{interview.candidateName}</div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="text-slate-600">{interview.position}</div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="text-slate-600">{interview.date}</div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className={`px-3 py-1 rounded-full text-xs font-medium capitalize ${getStatusColor(interview.status)}`}>
-                                                {interview.status.replace('-', ' ')}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            {interview.score ? (
-                                                <span className={`font-semibold ${getScoreColor(interview.score)}`}>
-                                                    {interview.score}%
-                                                </span>
+                        {interviews.map((interview, index) => (
+                            <motion.div
+                                key={interview._id}
+                                className="bg-white/80 backdrop-blur-xl shadow-lg rounded-xl p-6 border border-white/20"
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.1 * index }}
+                            >
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-4">
+                                        <div className={`p-3 rounded-full ${interview.isComplete ? "bg-green-100" : "bg-orange-100"
+                                            }`}>
+                                            {interview.isComplete ? (
+                                                <CheckCircle className="w-6 h-6 text-green-600" />
                                             ) : (
-                                                <span className="text-slate-400">-</span>
+                                                <Clock className="w-6 h-6 text-orange-600" />
                                             )}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="text-slate-600">{interview.interviewer}</div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex gap-2">
-                                                <motion.button
-                                                    className="p-2 text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-all duration-200"
-                                                    whileHover={{ scale: 1.1 }}
-                                                    whileTap={{ scale: 0.9 }}
-                                                >
-                                                    <Eye className="w-4 h-4" />
-                                                </motion.button>
-                                                {interview.status === 'completed' && (
-                                                    <motion.button
-                                                        className="p-2 text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-all duration-200"
-                                                        whileHover={{ scale: 1.1 }}
-                                                        whileTap={{ scale: 0.9 }}
-                                                    >
-                                                        <Download className="w-4 h-4" />
-                                                    </motion.button>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-lg font-semibold text-slate-800">{interview.userName}</h3>
+                                            <p className="text-sm text-slate-600">
+                                                {interview.type} Interview • Coach: {interview.coachName}
+                                            </p>
+                                            <div className="flex items-center gap-2 mt-1">
+                                                <span className={`text-xs px-2 py-1 rounded-full font-medium ${interview.isComplete
+                                                        ? "bg-green-100 text-green-700"
+                                                        : "bg-orange-100 text-orange-700"
+                                                    }`}>
+                                                    {interview.isComplete ? "Completed" : "In Progress"}
+                                                </span>
+                                                {interview.rating && (
+                                                    <div className="flex items-center gap-1">
+                                                        <Star className="w-3 h-3 text-yellow-400 fill-current" />
+                                                        <span className="text-xs text-slate-600">{interview.rating}/5</span>
+                                                    </div>
                                                 )}
                                             </div>
-                                        </td>
-                                    </motion.tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-sm text-slate-600 mb-1">
+                                            Started: {new Date(interview.createdAt).toLocaleDateString()}
+                                        </p>
+                                        {interview.completedAt && (
+                                            <p className="text-sm text-slate-600 mb-1">
+                                                Completed: {new Date(interview.completedAt).toLocaleDateString()}
+                                            </p>
+                                        )}
+                                        {interview.duration && (
+                                            <p className="text-sm text-slate-600 mb-3">
+                                                Duration: {interview.duration} min
+                                            </p>
+                                        )}
+                                        <div className="flex gap-2">
+                                            <button className="p-2 text-slate-600 hover:text-indigo-600 transition-colors duration-200">
+                                                <Eye className="w-4 h-4" />
+                                            </button>
+                                            <button className="p-2 text-slate-600 hover:text-green-600 transition-colors duration-200">
+                                                <Edit className="w-4 h-4" />
+                                            </button>
+                                            <button className="p-2 text-slate-600 hover:text-red-600 transition-colors duration-200">
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        ))}
                     </div>
-
-                    {filteredInterviews.length === 0 && (
-                        <div className="text-center py-12">
-                            <FileText className="w-12 h-12 text-slate-400 mx-auto mb-4" />
-                            <p className="text-slate-600">No interviews found matching your criteria</p>
-                        </div>
-                    )}
-                </motion.div>
+                )}
             </div>
         </div>
-        {/* Footer */}
-        <FooterComponent />
-    </>
     );
 }

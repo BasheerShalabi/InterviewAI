@@ -7,6 +7,8 @@ router.post('/', verifyToken, sessionController.createSession);
 
 router.get('/', verifyToken, sessionController.getMySessions);
 
+router.get('/all', verifyToken, requireRole(['admin']), sessionController.getAllSessions);
+
 router.get('/:id', verifyToken, sessionController.getSessionById);
 
 router.post('/:sessionId/message', verifyToken, sessionController.sendMessage);

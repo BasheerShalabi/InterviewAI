@@ -20,6 +20,7 @@ export default function CoachDashboard() {
     const [feedbackRating, setFeedbackRating] = useState(0);
     const [submittingFeedback, setSubmittingFeedback] = useState(false);
     const [activeTab, setActiveTab] = useState("requests"); // "requests", "users", "interviews"
+    const [chatOpen, setChatOpen] = useState(false);
 
     const getToken = () => {
         try {
@@ -760,6 +761,43 @@ export default function CoachDashboard() {
                     </motion.div>
                 </div>
             )}
+            {/* Chat Button */}
+            <button
+                onClick={() => setChatOpen(!chatOpen)}
+                className="fixed bottom-6 right-6 bg-indigo-600 hover:bg-indigo-700 text-white p-3 rounded-full shadow-lg transition-all duration-300"
+                title="Open chat"
+            >
+                <MessageCircle className="w-6 h-6" />
+            </button>
+
+            {/* Chat Modal */}
+            {chatOpen && (
+                <div className="fixed bottom-20 right-6 w-80 bg-white rounded-2xl shadow-xl p-4 border border-gray-200 z-50">
+                    <div className="flex justify-between items-center mb-2">
+                        <h2 className="text-lg font-semibold text-slate-800">Live Chat</h2>
+                        <button
+                            className="text-gray-500 hover:text-red-500"
+                            onClick={() => setChatOpen(false)}
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+                    </div>
+                    <div className="h-48 overflow-y-auto p-2 text-sm text-slate-700 space-y-2">
+                        <div className="bg-indigo-100 p-2 rounded-md w-fit">Hi! How can I help you?</div>
+                    </div>
+                    <div className="mt-2 flex">
+                        <input
+                            type="text"
+                            placeholder="Type a message..."
+                            className="flex-1 border border-gray-300 rounded-l-md p-2 text-sm focus:outline-none"
+                        />
+                        <button className="bg-indigo-600 text-white px-4 rounded-r-md hover:bg-indigo-700 text-sm">
+                            Send
+                        </button>
+                    </div>
+                </div>
+            )}
+            
 
             {/* Feedback Modal */}
             {feedbackModal && (
@@ -816,6 +854,7 @@ export default function CoachDashboard() {
                                 />
                             </div>
                         </div>
+                        
 
                         <div className="flex gap-3 justify-end mt-6">
                             <button
@@ -846,5 +885,6 @@ export default function CoachDashboard() {
                 </div>
             )}
         </div>
+        
     );
 }
