@@ -20,6 +20,7 @@ import {
   Star,
   X,
   Settings,
+  Coins,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -323,6 +324,7 @@ const CoachesManagement = ({ coaches, onRefresh }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCoach, setSelectedCoach] = useState(null);
   const [showModal, setShowModal] = useState(false);
+   
 
   console.log("loaded coaches", coaches);
 
@@ -544,6 +546,8 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [requests, setRequests] = useState([]);
+
 
   // Safe fetch function with error handling
   const safeFetch = async (url, options = {}) => {
@@ -571,9 +575,7 @@ export default function AdminDashboard() {
   const getToken = () => {
     try {
       return (
-        localStorage.getItem("session") ||
-        localStorage.getItem("token") ||
-        localStorage.getItem("authToken")
+        localStorage.getItem("session")
       );
     } catch (error) {
       console.warn("Error accessing localStorage:", error);
@@ -582,6 +584,29 @@ export default function AdminDashboard() {
   };
 
   
+  const fetchCoachingRequests = async () => {
+  const token = getToken();
+
+  try {
+    const response = await fetch('http://localhost:8000/api/admin/coaching-requests', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to fetch');
+    }
+
+    console.log('Coaching requests:', data);
+    setRequests(data);
+  } catch (err) {
+    console.error('Error fetching coaching requests:', err);
+  }
+};
+
 
   // Fetch data from API
   const fetchData = async () => {
@@ -783,9 +808,87 @@ export default function AdminDashboard() {
     }
   };
 
+  const acceptRequest = async (userId) => {
+ const token = getToken();
+
+  try {
+    const response = await fetch(`http://localhost:8000/api/admin/accept-coaching-request/${userId}`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to accept request");
+    }
+
+    alert(`Request accepted: ${data.message}`);
+    
+    // Optional: refresh the list or remove the accepted user from state
+    setRequests(prev => prev.filter(u => u._id !== userId));
+  } catch (error) {
+    console.error("Error accepting request:", error);
+    alert("Failed to accept request. Please try again.");
+  }
+  };
+
+  const declineRequest = async (userId) => {
+   const token = getToken();
+
+  try {
+    const response = await fetch(`http://localhost:8000/api/admin/decline-coaching-request/${userId}`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to decline request");
+    }
+
+    alert(`Request declined: ${data.message}`);
+    
+    // Optionally remove user from local UI
+    setRequests(prev => prev.filter(user => user._id !== userId));
+  } catch (error) {
+    console.error("Error declining request:", error);
+    alert("Failed to decline request. Please try again.");
+  }
+  };
+
+  const coachingRequests = requests.map((user,i) => (
+                        <tr
+                          key={i}
+                          className="bg-white border-b border-slate-200 hover:bg-slate-50"
+                        >
+                          <td className="px-4 py-3">{user.fullname}</td>
+                          <td className="px-4 py-3 flex justify-center gap-2">
+                            <button
+                              onClick={() => acceptRequest(user._id)}
+                              className="bg-green-500 hover:bg-green-600 text-white text-xs font-medium px-3 py-1 rounded-full"
+                            >
+                              Accept
+                            </button>
+                            <button
+                              onClick={() => declineRequest(user._id)}
+                              className="bg-red-500 hover:bg-red-600 text-white text-xs font-medium px-3 py-1 rounded-full"
+                            >
+                              Decline
+                            </button>
+                          </td>
+                        </tr>
+                    ))
+
   // Fetch data on component mount
   useEffect(() => {
     fetchData();
+    fetchCoachingRequests();
   }, []);
   [users, coaches, interviews];
 
@@ -1115,28 +1218,7 @@ export default function AdminDashboard() {
                       </tr>
                     </thead>
                     <tbody>
-                      {/* {requests.map((user) => ( */}
-                        <tr
-                          key={0}
-                          className="bg-white border-b border-slate-200 hover:bg-slate-50"
-                        >
-                          <td className="px-4 py-3">user.fullname</td>
-                          <td className="px-4 py-3 flex justify-center gap-2">
-                            <button
-                              onClick={() => acceptRequest(user._id)}
-                              className="bg-green-500 hover:bg-green-600 text-white text-xs font-medium px-3 py-1 rounded-full"
-                            >
-                              Accept
-                            </button>
-                            <button
-                              onClick={() => declineRequest(user._id)}
-                              className="bg-red-500 hover:bg-red-600 text-white text-xs font-medium px-3 py-1 rounded-full"
-                            >
-                              Decline
-                            </button>
-                          </td>
-                        </tr>
-                      {/* ))} */}
+                      {coachingRequests} 
                     </tbody>
                   </table>
                 </div>

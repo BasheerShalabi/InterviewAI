@@ -11,4 +11,8 @@ router.get('/coaches', verifyToken, requireRole(['admin']), adminController.getA
 
 router.get('/coaching-requests', verifyToken, requireRole(['admin']), adminController.getAllCoachingRequests);
 
+router.post('/accept-coaching-request/:userId', verifyToken, requireRole(['admin']), adminController.acceptCoachingRequest);
+
+router.post('/decline-coaching-request/:userId', verifyToken, requireRole(['admin']), adminController.declineCoachingRequest);
+
 module.exports = router;

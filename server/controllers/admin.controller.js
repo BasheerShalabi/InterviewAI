@@ -98,3 +98,40 @@ module.exports.getAllCoachesData = async (req, res) => {
         res.status(500).json({ error: "Server error fetching coaches." });
     }
 }
+module.exports.acceptCoachingRequest = async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        // Find the user and update their role to 'coach'
+        const user = await User.findByIdAndUpdate(userId, { role: 'coach', coachingRequest: false }, { new: true });
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }       
+        // Optionally, you can also clear the pendingCoachRequest field
+        await User.findByIdAndUpdate(userId, { pendingCoachRequest: null }, {
+            runValidators: true
+        });
+        res.json({ message: "Coaching request accepted", user });
+    } catch (err) {
+        console.error("Error accepting coaching request:", err);    
+        res.status(500).json({ error: err.message });
+    }
+
+}
+ module.exports.declineCoachingRequest = async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        // Find the user and update their coachingRequest status
+        const user = await User.findByIdAndUpdate(userId, { coachingRequest: false, pendingCoachRequest: null }, { new: true });
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        res.json({ message: "Coaching request declined", user });
+    } catch (err) {
+        console.error("Error declining coaching request:", err);
+        res.status(500).json({ error: err.message });
+    }           
+
+}
