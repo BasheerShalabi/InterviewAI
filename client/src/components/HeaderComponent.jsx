@@ -10,6 +10,8 @@ const HeaderComponent = (props) => {
     location.pathname.startsWith("/chat") ||
     location.pathname.startsWith("/result") ||
     location.pathname.startsWith("/interview")
+  
+    const  hideDashboard = location.pathname.startsWith("/dashboard")
   return (
     <header className="bg-white/80 backdrop-blur-md border-b border-slate-200/50 sticky top-0 z-50 shadow-sm">
       <div className="max-w-6xl mx-auto px-6 py-4">
@@ -65,13 +67,23 @@ const HeaderComponent = (props) => {
             )}
 
             {!shouldHideButton ? (
-              user ? (
+              user ? (<>
+              {!hideDashboard ? (
+
+                  <Link
+                    to="/dashboard"
+                    className="bg-gradient-to-r from-slate-600 to-slate-700 text-white px-6 py-2.5 rounded-xl font-medium hover:from-slate-700 hover:to-slate-800 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
+                  >
+                    Dashboard
+                  </Link>
+              ): <></>}
                 <Link
                   to="/interview"
                   className="bg-gradient-to-r from-slate-600 to-slate-700 text-white px-6 py-2.5 rounded-xl font-medium hover:from-slate-700 hover:to-slate-800 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
                 >
                   Start Interview
                 </Link>
+              </>
               ) : (
                 <Link
                   to="/register"

@@ -22,6 +22,7 @@ import HeaderComponent from "../components/HeaderComponent";
 import { useAuth } from "../context/AuthContext";
 import FooterComponent from "../components/FooterComponent";
 import { Link } from "react-router-dom";
+import PopUpChat from "../components/PopUpChat";
 
 export default function UserDashboard() {
     const { user, logout } = useAuth();
@@ -93,6 +94,7 @@ export default function UserDashboard() {
                 }
             });
             setChatPartners(response.data);
+            console.log(response.data)
         } catch (error) {
             console.error('Error fetching chat partners:', error);
             // Fallback: if user has a coach, add them as chat partner
@@ -608,9 +610,10 @@ export default function UserDashboard() {
                 )}
 
                 {/* Live Chat Component */}
-                <LiveChat user={user} chatPartners={chatPartners} />
+                
             </div>
             <FooterComponent />
+            <PopUpChat user={user} chatPartners={chatPartners} />
         </>
     );
 }
