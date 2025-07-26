@@ -9,5 +9,6 @@ router.post('/register', userController.registerUser);
 router.post('/login', userController.loginUser);
 
 router.post('/request/:coachId', verifyToken, coachController.requestCoach);
+router.post('/send-request', verifyToken, userController.sendRequest);
 
 module.exports = router;
