@@ -21,6 +21,7 @@ import HeaderComponent from "../components/HeaderComponent";
 import { useAuth } from "../context/AuthContext";
 import FooterComponent from "../components/FooterComponent";
 import { Link } from "react-router-dom";
+import PopUpChat from "../components/PopUpChat";
 
 export default function UserDashboard() {
   const { user, logout } = useAuth();
@@ -95,24 +96,34 @@ export default function UserDashboard() {
             "Content-Type": "application/json",
           },
         }
-      );
-      setChatPartners(response.data);
-    } catch (error) {
-      console.error("Error fetching chat partners:", error);
-      // Fallback: if user has a coach, add them as chat partner
-      if (user?.coachId) {
-        const coachName = getCurrentCoachName();
-        if (coachName) {
-          setChatPartners([
-            {
-              _id:
-                typeof user.coachId === "object"
-                  ? user.coachId._id
-                  : user.coachId,
-              fullname: coachName,
-              email: typeof user.coachId === "object" ? user.coachId.email : "",
-            },
-          ]);
+    };
+
+    // Fetch chat partners (coach if assigned)
+    const fetchChatPartners = async () => {
+        if (!token) return;
+
+        try {
+            const response = await axios.get('http://localhost:8000/api/chat/partners', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            setChatPartners(response.data);
+            console.log(response.data)
+        } catch (error) {
+            console.error('Error fetching chat partners:', error);
+            // Fallback: if user has a coach, add them as chat partner
+            if (user?.coachId) {
+                const coachName = getCurrentCoachName();
+                if (coachName) {
+                    setChatPartners([{
+                        _id: typeof user.coachId === 'object' ? user.coachId._id : user.coachId,
+                        fullname: coachName,
+                        email: typeof user.coachId === 'object' ? user.coachId.email : ''
+                    }]);
+                }
+            }
         }
       }
     }
@@ -679,10 +690,10 @@ export default function UserDashboard() {
           </div>
         )}
 
-        {/* Live Chat Component */}
-        <LiveChat user={user} chatPartners={chatPartners} />
+        
       </div>
       <FooterComponent />
+      <PopUpChat user={user} chatPartners={chatPartners} />
     </>
   );
 }
