@@ -98,16 +98,16 @@ router.get('/partners', auth, async (req, res) => {
         
         if (req.user.role === 'coach') {
             // Get all assigned users
-            partners = await User.find({ coachId: req.user.id })
+            partners = await User.find({ assignedCoachId: req.user.id })
                 .select('_id fullname name email role')
                 .lean();
             console.log(`Coach has ${partners.length} assigned users`);
         } else {
             // Get coach if assigned
-            const user = await User.findById(req.user.id).populate('coachId', '_id fullname name email role');
-            if (user && user.coachId) {
-                partners = [user.coachId];
-                console.log(`User has coach: ${user.coachId.fullname || user.coachId.name}`);
+            const user = await User.findById(req.user.id).populate('assignedCoachId', '_id fullname name email role');
+            if (user && user.assignedCoachId) {
+                partners = [user.assignedCoachId];
+                console.log(`User has coach: ${user.assignedCoachId.fullname}`);
             } else {
                 console.log('User has no assigned coach');
             }
