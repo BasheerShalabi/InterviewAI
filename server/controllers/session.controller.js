@@ -4,6 +4,16 @@ const callAiModel = require('../utils/ai');
 const parseAiFeedback = require('../utils/parser');
 const { cleanQuestion } = require('../utils/responseCleaner')
 
+
+module.exports.getAllSessions = async (req, res) => {
+    try {
+        const sessions = await Session.find({}).sort({ createdAt: -1 });
+        res.json(sessions);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Server error fetching sessions." });
+    }
+}
 module.exports.createSession = async (req, res) => {
     try {
         const { raw, numQuestions, type } = req.body;
