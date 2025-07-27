@@ -43,13 +43,16 @@ module.exports.getAllUsersData = async (req, res) => {
 };
 
 module.exports.getAllCoachingRequests = async (req, res) => {
-    try { const requests = await User.find({ coachingRequest: true, role: 'user' })
-        .select('-password')    
-        .sort({ createdAt: -1 });
+    try {
+        const requests = await User.find({ coachingRequest: true, role: 'user' })
+            .select('-password')
+            .sort({ createdAt: -1 });
         res.json(requests);
     } catch (error) {
-        console.error("Error fetching coaching requests:", error)}};
-    
+        console.error("Error fetching coaching requests:", error)
+    }
+};
+
 
 module.exports.getAllCoachesData = async (req, res) => {
     try {
@@ -106,19 +109,19 @@ module.exports.acceptCoachingRequest = async (req, res) => {
         const user = await User.findByIdAndUpdate(userId, { role: 'coach', coachingRequest: false }, { new: true });
         if (!user) {
             return res.status(404).json({ error: "User not found" });
-        }       
+        }
         // Optionally, you can also clear the pendingCoachRequest field
         await User.findByIdAndUpdate(userId, { pendingCoachRequest: null , assignedCoachId: null }, {
             runValidators: true
         });
         res.json({ message: "Coaching request accepted", user });
     } catch (err) {
-        console.error("Error accepting coaching request:", err);    
+        console.error("Error accepting coaching request:", err);
         res.status(500).json({ error: err.message });
     }
 
 }
- module.exports.declineCoachingRequest = async (req, res) => {
+module.exports.declineCoachingRequest = async (req, res) => {
     try {
         const { userId } = req.params;
 
@@ -132,6 +135,95 @@ module.exports.acceptCoachingRequest = async (req, res) => {
     } catch (err) {
         console.error("Error declining coaching request:", err);
         res.status(500).json({ error: err.message });
-    }           
+    }
 
 }
+
+module.exports.deleteUser = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const adminId = req.user.id; // From authentication middleware
+
+        // Verify admin permissions
+        const admin = await User.findById(adminId);
+        if (!admin || admin.role !== 'admin') {
+            return res.status(403).json({
+                success: false,
+                message: 'Access denied. Admin privileges required.'
+            });
+        }
+
+        // Find the user to delete
+        const userToDelete = await User.findById(userId);
+        if (!userToDelete) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found.'
+            });
+        }
+
+        // Check if user is admin (prevent admin deletion)
+        if (userToDelete.role === 'admin') {
+            return res.status(403).json({
+                success: false,
+                message: 'Cannot delete admin users.'
+            });
+        }
+
+        // Only allow deletion of users and coaches
+        if (!['user', 'coach'].includes(userToDelete.role)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid user role for deletion.'
+            });
+        }
+
+        if (userToDelete.role === 'coach') {
+            const assignedUsers = await User.find({ coachId: userId });
+            
+            if (assignedUsers.length > 0) {
+                await User.updateMany(
+                    { coachId: userId },
+                    { $unset: { coachId: "" } }
+                );
+            }
+
+            await Session.updateMany(
+                { coachId: userId },
+                { $unset: { coachId: "", coachFeedback: "" } }
+            );
+        }
+
+        if (userToDelete.role === 'user') {
+            await Session.deleteMany({ userId: userId });
+
+            if (userToDelete.coachId) {
+                await User.findByIdAndUpdate(
+                    userToDelete.coachId,
+                    { $pull: { assignedUsers: userId } }
+                );
+            }
+        }
+
+        await User.findByIdAndDelete(userId);
+
+        res.status(200).json({
+            success: true,
+            message: `${userToDelete.role.charAt(0).toUpperCase() + userToDelete.role.slice(1)} deleted successfully.`,
+            deletedUser: {
+                id: userToDelete._id,
+                name: userToDelete.fullname,
+                email: userToDelete.email,
+                role: userToDelete.role
+            }
+        });
+
+    } catch (error) {
+        console.error('Error deleting user:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error while deleting user.',
+            error: error.message
+        });
+    }
+};
