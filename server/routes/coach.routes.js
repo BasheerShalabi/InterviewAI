@@ -13,5 +13,6 @@ router.post('/respond/:userId', verifyToken, requireRole(['coach', 'admin']), co
 router.get('/assigned-users', verifyToken, requireRole(['coach', 'admin']), coachController.getAssignedUsers);
 
 router.get('/assigned-users/sessions', verifyToken, requireRole(['coach', 'admin']), coachController.getAssignedUserSessions);
+router.patch('/assigned-users/remove/:userId', verifyToken, requireRole(['coach', 'admin']), coachController.removeUser);
 
 module.exports = router;

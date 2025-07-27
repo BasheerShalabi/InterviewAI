@@ -25,7 +25,7 @@ import PopUpChat from "../components/PopUpChat";
 import { useAlert } from "../context/AlertContext";
 
 export default function UserDashboard() {
-    const { user, logout } = useAuth();
+    const { user, logout , update } = useAuth();
     const [interviews, setInterviews] = useState([]);
     const [loading, setLoading] = useState(true);
     const [coaches, setCoaches] = useState([]);
@@ -222,6 +222,7 @@ const handleRequestCoach = async () => {
 
         setCoachRequested(true);
         setSelectedCoach("");
+        update();
         showAlert('Request sent' , "success")
     } catch (err) {
         console.error("Error sending request:", err);

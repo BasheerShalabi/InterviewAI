@@ -67,11 +67,29 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const update = (token) => {
-        localStorage.removeItem("session");
-        localStorage.setItem("session", token);
-        const decodedUser = jwtDecode(token);
-        setUser(decodedUser);
+    const update = async () => {
+        const token = localStorage.getItem("session");
+        try{
+
+            const res = await fetch("http://localhost:8000/api/users/update", {
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                }})
+
+            if (!res.ok) {
+                throw new Error("Failed to update user");
+            }
+            const data = await res.json();
+            console.log("User updated:", data.token);
+            localStorage.setItem("session", data.token);
+            const updatedUser = jwtDecode(data.token);
+            setUser(updatedUser);
+            showAlert("User updated successfully", "success");
+        }catch(err){
+            console.error("Error updating user:", err);
+            showAlert(err, "error");
+        }
 
     }
 
