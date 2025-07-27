@@ -24,6 +24,8 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAlert } from "../context/AlertContext";
+import { useAuth } from "../context/AuthContext";
+import HeaderComponent from "../components/HeaderComponent";
 
 // Users Management Component
 const UsersManagement = ({ users, onRefresh }) => {
@@ -543,6 +545,8 @@ export default function AdminDashboard() {
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [requests, setRequests] = useState([]);
+    const {user , logout} = useAuth()
+    const {showAlert} = useAlert()
 
 
     // Safe fetch function with error handling
@@ -796,6 +800,7 @@ export default function AdminDashboard() {
                 console.warn("No interviews data received");
                 setInterviews([]);
             }
+            showAlert("Dashboard Loaded successfuly" , "success")
         } catch (error) {
             console.error("Error in fetchData:", error);
             setError(`Failed to load dashboard data: ${error.message}`);
@@ -939,8 +944,11 @@ export default function AdminDashboard() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-100">
+            <HeaderComponent user={user} logout={logout}/>
             {/* Header */}
-            <div className="bg-white/80 backdrop-blur-xl shadow-lg border-b border-white/20">
+
+            <div className="max-w-7xl mx-auto p-6">
+            <div className="bg-white/80 backdrop-blur-xl mb-10 shadow-lg border-b border-white/20">
                 <div className="max-w-7xl mx-auto px-6 py-4">
                     <div className="flex items-center justify-between">
                         <div>
@@ -952,9 +960,6 @@ export default function AdminDashboard() {
                             </p>
                         </div>
                         <div className="flex items-center gap-4">
-                            <button className="p-2 text-slate-600 hover:text-indigo-600 transition-colors duration-200">
-                                <Settings className="w-5 h-5" />
-                            </button>
                             <button className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200">
                                 <Download className="w-4 h-4" />
                                 Export Data
@@ -963,8 +968,6 @@ export default function AdminDashboard() {
                     </div>
                 </div>
             </div>
-
-            <div className="max-w-7xl mx-auto p-6">
                 {/* Tab Navigation */}
                 <div className="mb-8">
                     <div className="flex gap-2 bg-white/60 backdrop-blur-sm rounded-xl p-2 border border-white/20">

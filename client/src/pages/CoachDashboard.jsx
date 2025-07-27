@@ -502,6 +502,7 @@ export default function CoachDashboard() {
                         : [];
 
                     setCompletedInterviews(transformedInterviews);
+                    showAlert("Dashboard Loaded successfuly" , "success")
                 }
 
             } catch (err) {

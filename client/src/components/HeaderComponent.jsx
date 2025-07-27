@@ -82,7 +82,7 @@ const HeaderComponent = (props) => {
                   to="/interview"
                   className="bg-gradient-to-r from-slate-600 to-slate-700 text-white px-6 py-2.5 rounded-xl font-medium hover:from-slate-700 hover:to-slate-800 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
                 >
-                  Start Interview
+                  {user.role === "admin" ? "Test Interview" : "Start Interview"}
                 </Link>
               </>
               ) : (

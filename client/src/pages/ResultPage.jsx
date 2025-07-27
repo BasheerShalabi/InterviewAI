@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams , Link } from 'react-router-dom';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -26,124 +26,124 @@ export default function ResultsPage() {
     const [loading, setLoading] = useState(true);
     const token = localStorage.getItem("session");
     const redirect = useNavigate()
-    const {showAlert} = useAlert()
-    const {user,logout} = useAuth()
-    const [userName,setUserName] = useState("Anonymous Candidate")
+    const { showAlert } = useAlert()
+    const { user, logout } = useAuth()
+    const [userName, setUserName] = useState("Anonymous Candidate")
     const [sessionId, setSessionId] = useState(0)
 
-const exportFeedbackPDF = (data) => {
-    const doc = new jsPDF();
-    let y = 10;
+    const exportFeedbackPDF = (data) => {
+        const doc = new jsPDF();
+        let y = 10;
 
-    doc.setFont("Helvetica", "bold");
-    doc.setFontSize(16);
-    doc.text("Interview Feedback Report", 10, y);
-    y += 10;
+        doc.setFont("Helvetica", "bold");
+        doc.setFontSize(16);
+        doc.text("Interview Feedback Report", 10, y);
+        y += 10;
 
-    doc.setFontSize(12);
-    doc.setFont("Helvetica", "normal");
-    doc.text(`Overall Score: ${data.overallScore}`, 10, y);
-    y += 10;
+        doc.setFontSize(12);
+        doc.setFont("Helvetica", "normal");
+        doc.text(`Overall Score: ${data.overallScore}`, 10, y);
+        y += 10;
 
-    doc.setFont("Helvetica", "bold");
-    doc.text("Question Feedback:", 10, y);
-    y += 6;
-    doc.setFont("Helvetica", "normal");
-    data.feedback.forEach(item => {
-        const feedbackLine = `Q${item.questionNumber}: ${item.content}`;
-        const lines = doc.splitTextToSize(feedbackLine, 180);
-        doc.text(lines, 10, y);
-        y += lines.length * 6;
-    });
-
-    y += 4;
-    doc.setFont("Helvetica", "bold");
-    doc.text("Final Review", 10, y);
-    y += 6;
-    doc.setFont("Helvetica", "normal");
-    doc.text(`Summary: ${data.finalReview.summary}`, 10, y);
-    y += 10;
-
-    doc.setFont("Helvetica", "bold");
-    doc.text("Strengths:", 10, y);
-    y += 6;
-    doc.setFont("Helvetica", "normal");
-    data.finalReview.strengths.forEach(s => {
-        doc.text(`• ${s}`, 14, y);
+        doc.setFont("Helvetica", "bold");
+        doc.text("Question Feedback:", 10, y);
         y += 6;
-    });
+        doc.setFont("Helvetica", "normal");
+        data.feedback.forEach(item => {
+            const feedbackLine = `Q${item.questionNumber}: ${item.content}`;
+            const lines = doc.splitTextToSize(feedbackLine, 180);
+            doc.text(lines, 10, y);
+            y += lines.length * 6;
+        });
 
-    doc.setFont("Helvetica", "bold");
-    doc.text("Weaknesses:", 10, y);
-    y += 6;
-    doc.setFont("Helvetica", "normal");
-    data.finalReview.weaknesses.forEach(w => {
-        doc.text(`• ${w}`, 14, y);
+        y += 4;
+        doc.setFont("Helvetica", "bold");
+        doc.text("Final Review", 10, y);
         y += 6;
-    });
+        doc.setFont("Helvetica", "normal");
+        doc.text(`Summary: ${data.finalReview.summary}`, 10, y);
+        y += 10;
 
-    doc.setFont("Helvetica", "bold");
-    doc.text("Category Scores:", 10, y);
-    y += 4;
+        doc.setFont("Helvetica", "bold");
+        doc.text("Strengths:", 10, y);
+        y += 6;
+        doc.setFont("Helvetica", "normal");
+        data.finalReview.strengths.forEach(s => {
+            doc.text(`• ${s}`, 14, y);
+            y += 6;
+        });
 
-    autoTable(doc, {
-        startY: y,
-        head: [["Clarity", "Confidence", "Relevance"]],
-        body: [[
-        data.finalReview.scores.clarity,
-        data.finalReview.scores.confidence,
-        data.finalReview.scores.relevance
-        ]],
-        theme: "striped",
-        styles: { fontSize: 11 },
-        headStyles: { fillColor: [100, 100, 255] },
-        margin: { left: 10, right: 10 }
-    });
+        doc.setFont("Helvetica", "bold");
+        doc.text("Weaknesses:", 10, y);
+        y += 6;
+        doc.setFont("Helvetica", "normal");
+        data.finalReview.weaknesses.forEach(w => {
+            doc.text(`• ${w}`, 14, y);
+            y += 6;
+        });
 
-    y = doc.lastAutoTable.finalY + 10;
+        doc.setFont("Helvetica", "bold");
+        doc.text("Category Scores:", 10, y);
+        y += 4;
 
-    doc.setFont("Helvetica", "bold");
-    doc.text("Suggestions:", 10, y);
-    y += 6;
-    doc.setFont("Helvetica", "normal");
-    const suggestionLines = doc.splitTextToSize(data.finalReview.suggestions, 180);
-    doc.text(suggestionLines, 10, y);
+        autoTable(doc, {
+            startY: y,
+            head: [["Clarity", "Confidence", "Relevance"]],
+            body: [[
+                data.finalReview.scores.clarity,
+                data.finalReview.scores.confidence,
+                data.finalReview.scores.relevance
+            ]],
+            theme: "striped",
+            styles: { fontSize: 11 },
+            headStyles: { fillColor: [100, 100, 255] },
+            margin: { left: 10, right: 10 }
+        });
 
-    doc.save("interview-feedback.pdf");
-};
+        y = doc.lastAutoTable.finalY + 10;
+
+        doc.setFont("Helvetica", "bold");
+        doc.text("Suggestions:", 10, y);
+        y += 6;
+        doc.setFont("Helvetica", "normal");
+        const suggestionLines = doc.splitTextToSize(data.finalReview.suggestions, 180);
+        doc.text(suggestionLines, 10, y);
+
+        doc.save("interview-feedback.pdf");
+    };
 
 
 
     const fetchSession = async () => {
-            setLoading(true)
-            try {
-                const res = await axios({ method: 'get', url: `http://localhost:8000/api/sessions/${id}`,
-                    headers: { Authorization: `Bearer ${token}` }})
-            
-                    const session = res.data;
-                    console.log("Session fetched:", session);
-                    setUserName(session.userName)
-                    setSessionId(session._id)
-                    showAlert("Session loaded successfully", "success");
-                    console.log("Session in progress:", session.inProgress);
-                    console.log("Session in progress:", session.isComplete);
-                    if(session.inProgress || !session.isComplete) {
-                        showAlert("Redirecting ...", "info");
-                        redirect(`/chat/session/${id}`);
-                    }else{
-                        setResults({
-                            feedback : session.feedback,
-                            overallScore: session.overallScore,
-                            finalReview: session.finalReview,
-                            date: session.createdAt
-                        })
-                    }
-            } catch (err) {
-                console.error("Error fetching session:", err);
-            }finally {
-                setLoading(false);
+        setLoading(true)
+        try {
+            const res = await axios({
+                method: 'get', url: `http://localhost:8000/api/sessions/${id}`,
+                headers: { Authorization: `Bearer ${token}` }
+            })
+
+            const session = res.data;
+            console.log("Session fetched:", session);
+            setUserName(session.userName)
+            setSessionId(session._id)
+            showAlert("Feedback loaded successfully", "success");
+            if (session.inProgress || !session.isComplete) {
+                showAlert("Redirecting ...", "info");
+                redirect(`/chat/session/${id}`);
+            } else {
+                setResults({
+                    feedback: session.feedback,
+                    overallScore: session.overallScore,
+                    finalReview: session.finalReview,
+                    date: session.createdAt
+                })
             }
+        } catch (err) {
+            console.error("Error fetching session:", err);
+        } finally {
+            setLoading(false);
         }
+    }
 
     useEffect(() => {
         fetchSession();
@@ -166,7 +166,7 @@ const exportFeedbackPDF = (data) => {
 
     return (
         <>
-        <HeaderComponent user={user} logout={logout}/>
+            <HeaderComponent user={user} logout={logout} />
             <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-6">
                 <div className="max-w-6xl mx-auto">
                     {/* Header */}
@@ -196,28 +196,20 @@ const exportFeedbackPDF = (data) => {
 
                             <div className="flex gap-3">
                                 <motion.button
-                                    className="flex items-center gap-2 px-4 py-2 border border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 transition-all duration-300"
-                                    whileHover={{ scale: 1.02 }}
-                                    whileTap={{ scale: 0.98 }}
-                                >
-                                    <Share2 className="w-4 h-4" />
-                                    Share
-                                </motion.button>
-                                <motion.button
                                     className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-xl hover:bg-slate-700 transition-all duration-300"
                                     whileHover={{ scale: 1.02 }}
                                     whileTap={{ scale: 0.98 }}
-                                    onClick={()=>exportFeedbackPDF(results)}
+                                    onClick={() => exportFeedbackPDF(results)}
                                 >
                                     <Download className="w-4 h-4" />
                                     Export PDF
                                 </motion.button>
-                                
-                                    <Link to={`/chat/session/${sessionId}`} className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-xl hover:bg-slate-700 transition-all duration-300">
-                                        <Eye className="w-4 h-4" />
-                                            Back to Interview
-                                    </Link>
-                                
+
+                                <Link to={`/chat/session/${sessionId}`} className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-xl hover:bg-slate-700 transition-all duration-300">
+                                    <Eye className="w-4 h-4" />
+                                    Back to Interview
+                                </Link>
+
                             </div>
                         </div>
 

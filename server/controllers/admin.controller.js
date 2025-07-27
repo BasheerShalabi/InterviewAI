@@ -108,7 +108,7 @@ module.exports.acceptCoachingRequest = async (req, res) => {
             return res.status(404).json({ error: "User not found" });
         }       
         // Optionally, you can also clear the pendingCoachRequest field
-        await User.findByIdAndUpdate(userId, { pendingCoachRequest: null }, {
+        await User.findByIdAndUpdate(userId, { pendingCoachRequest: null , assignedCoachId: null }, {
             runValidators: true
         });
         res.json({ message: "Coaching request accepted", user });
