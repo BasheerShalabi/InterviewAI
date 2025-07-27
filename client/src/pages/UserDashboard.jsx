@@ -192,6 +192,7 @@ const fetchData = async () => {
         console.log("Fetched sessions:", data);
         setCount(data.filter((i) => i.isComplete).length);
         setInterviews(data);
+        showAlert("Dashboard Loaded successfuly" , "success")
     } catch (err) {
         console.error("Failed to fetch sessions:", err);
     } finally {

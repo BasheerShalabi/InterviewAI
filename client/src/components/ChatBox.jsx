@@ -154,7 +154,7 @@ export default function AIChatBox() {
     ))
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-8 flex flex-col max-w-5xl mx-auto rounded-3xl shadow-2xl border border-white/20 backdrop-blur-xl">
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-8 flex flex-col max-w-5xl mx-auto my-5 rounded-3xl shadow-2xl border border-white/20 backdrop-blur-xl">
             <motion.h1
                 className="text-4xl font-bold text-slate-800 mb-8 select-none"
                 initial={{ opacity: 0, y: -20 }}
@@ -165,7 +165,7 @@ export default function AIChatBox() {
 
             {/* Messages container */}
             <motion.div
-                className="flex-1 flex flex-col overflow-y-auto bg-white/70 backdrop-blur-md rounded-2xl p-6 shadow-inner border border-white/30"
+                className="flex-1 flex flex-col max-h-[800px] overflow-y-auto scrollbar-none bg-white/70 backdrop-blur-md rounded-2xl p-6 shadow-inner border border-white/30"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 style={{ scrollbarWidth: "thin" }}
