@@ -101,3 +101,23 @@ module.exports.getAssignedUserSessions = async (req, res) => {
         res.status(500).json({ error: "Server error fetching sessions." });
     }
 };
+
+module.exports.removeUser = async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        // Check if the user is assigned to the coach
+        const user = await User.findOne({ _id: userId, assignedCoachId: req.user.id });
+        if (!user) {
+            return res.status(404).json({ error: "User not found or not assigned to this coach." });
+        }
+
+        // Remove the assigned coach from the user
+        await User.findByIdAndUpdate(userId, { assignedCoachId: null }, { runValidators: true });
+
+        res.json({ message: "User removed from coaching." });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Server error removing user." });
+    }
+}

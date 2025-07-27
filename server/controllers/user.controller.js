@@ -64,3 +64,19 @@ module.exports.sendRequest = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 }
+
+module.exports.updateToken = async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id);
+        if (!user) return res.status(404).json({ error: "User not found" });
+
+        const token = jwt.sign({ id: user._id, role: user.role, fullname: user.fullname , requestId:user.pendingCoachRequest ,coachId: user.assignedCoachId }, JWT_SECRET, {
+            expiresIn: '1d'
+        });
+
+        res.json({ token: token });
+    } catch (err) {
+        console.error("Error updating token:", err);
+        res.status(500).json({ error: err.message });
+    }
+}

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { CheckCircle, FileText, User, Users, Clock, Award, X, AlertTriangle, MessageCircle, Star, Send, Eye, Smile, Paperclip, Phone, Video, MoreVertical, CheckCheck } from "lucide-react";
+import { CheckCircle, FileText, User, Users, Clock, Award, X, AlertTriangle, MessageCircle, Star, Send, Eye, Edit } from "lucide-react";
 import HeaderComponent from "../components/HeaderComponent";
 import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
@@ -9,355 +9,6 @@ import LiveChat from "../components/LiveChat";
 import PopUpChat from "../components/PopUpChat";
 import { useAlert } from "../context/AlertContext";
 
-// LiveChat Component
-// const LiveChat = ({ user, chatPartners = [] }) => {
-//     const [isOpen, setIsOpen] = useState(false);
-//     const [selectedPartner, setSelectedPartner] = useState(null);
-//     const [newMessage, setNewMessage] = useState('');
-//     const [showPartnerList, setShowPartnerList] = useState(true);
-//     const [messages, setMessages] = useState({});
-//     const [onlineUsers, setOnlineUsers] = useState(new Set());
-//     const [typingUsers, setTypingUsers] = useState(new Set());
-//     const [unreadCounts, setUnreadCounts] = useState({});
-//     const [isConnected, setIsConnected] = useState(true);
-//     const messagesEndRef = useRef(null);
-//     const chatInputRef = useRef(null);
-//     const typingTimeoutRef = useRef(null);
-
-//     // Mock socket functions for demo - replace with actual useSocket hook
-//     const sendMessage = (recipientId, content) => {
-//         const newMsg = {
-//             id: Date.now().toString(),
-//             senderId: user.id,
-//             senderName: user.fullname,
-//             recipientId,
-//             content,
-//             timestamp: new Date(),
-//             read: false
-//         };
-
-//         setMessages(prev => ({
-//             ...prev,
-//             [recipientId]: [...(prev[recipientId] || []), newMsg]
-//         }));
-//     };
-
-//     const joinChat = (partnerId) => {
-//         console.log('Joining chat with:', partnerId);
-//     };
-
-//     const startTyping = (recipientId) => {
-//         console.log('Started typing to:', recipientId);
-//     };
-
-//     const stopTyping = (recipientId) => {
-//         console.log('Stopped typing to:', recipientId);
-//     };
-
-//     const markMessagesAsRead = (partnerId) => {
-//         setUnreadCounts(prev => ({
-//             ...prev,
-//             [partnerId]: 0
-//         }));
-//     };
-
-//     // Auto-scroll to bottom
-//     useEffect(() => {
-//         if (messagesEndRef.current) {
-//             messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-//         }
-//     }, [messages, selectedPartner]);
-
-//     // Focus input when partner is selected
-//     useEffect(() => {
-//         if (selectedPartner && chatInputRef.current) {
-//             chatInputRef.current.focus();
-//         }
-//     }, [selectedPartner]);
-
-//     // Join chat room when partner is selected
-//     useEffect(() => {
-//         if (selectedPartner) {
-//             joinChat(selectedPartner._id);
-//             markMessagesAsRead(selectedPartner._id);
-//             setShowPartnerList(false);
-//         }
-//     }, [selectedPartner]);
-
-//     const handleSendMessage = (e) => {
-//         e.preventDefault();
-//         if (!newMessage.trim() || !selectedPartner) return;
-
-//         sendMessage(selectedPartner._id, newMessage);
-//         setNewMessage('');
-//         stopTyping(selectedPartner._id);
-//     };
-
-//     const handleTyping = (e) => {
-//         setNewMessage(e.target.value);
-
-//         if (!selectedPartner) return;
-
-//         startTyping(selectedPartner._id);
-
-//         // Clear previous timeout
-//         if (typingTimeoutRef.current) {
-//             clearTimeout(typingTimeoutRef.current);
-//         }
-
-//         // Stop typing after 3 seconds of inactivity
-//         typingTimeoutRef.current = setTimeout(() => {
-//             stopTyping(selectedPartner._id);
-//         }, 3000);
-//     };
-
-//     const formatTime = (timestamp) => {
-//         const date = new Date(timestamp);
-//         const now = new Date();
-//         const diffInMinutes = Math.floor((now - date) / (1000 * 60));
-
-//         if (diffInMinutes < 1) return 'Just now';
-//         if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
-//         if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`;
-
-//         return date.toLocaleDateString();
-//     };
-
-//     const getTotalUnreadCount = () => {
-//         return Object.values(unreadCounts).reduce((sum, count) => sum + count, 0);
-//     };
-
-//     const partnerMessages = selectedPartner ? messages[selectedPartner._id] || [] : [];
-//     const isPartnerTyping = selectedPartner && typingUsers.has(selectedPartner._id);
-//     const isPartnerOnline = selectedPartner && onlineUsers.has(selectedPartner._id);
-
-//     if (!isOpen) {
-//         return (
-//             <button
-//                 onClick={() => setIsOpen(true)}
-//                 className="fixed bottom-6 right-6 bg-indigo-600 hover:bg-indigo-700 text-white p-3 rounded-full shadow-lg transition-all duration-300 relative"
-//                 title="Open live chat"
-//             >
-//                 <MessageCircle className="w-6 h-6" />
-//                 {getTotalUnreadCount() > 0 && (
-//                     <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-//                         {getTotalUnreadCount() > 9 ? '9+' : getTotalUnreadCount()}
-//                     </span>
-//                 )}
-//                 {!isConnected && (
-//                     <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></div>
-//                 )}
-//             </button>
-//         );
-//     }
-
-//     return (
-//         <div className="fixed bottom-6 right-6 w-96 h-96 bg-white rounded-2xl shadow-2xl border border-gray-200 z-50 flex flex-col">
-//             {/* Header */}
-//             <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-indigo-600 text-white rounded-t-2xl">
-//                 <div className="flex items-center gap-3">
-//                     {selectedPartner && !showPartnerList ? (
-//                         <>
-//                             <button
-//                                 onClick={() => {
-//                                     setSelectedPartner(null);
-//                                     setShowPartnerList(true);
-//                                 }}
-//                                 className="text-white hover:text-indigo-200"
-//                             >
-//                                 ←
-//                             </button>
-//                             <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-//                                 <User className="w-4 h-4" />
-//                             </div>
-//                             <div>
-//                                 <h3 className="font-semibold text-sm">{selectedPartner.fullname}</h3>
-//                                 <p className="text-xs text-indigo-200">
-//                                     {isPartnerOnline ? 'Online' : 'Offline'}
-//                                     {isPartnerTyping && ' • typing...'}
-//                                 </p>
-//                             </div>
-//                         </>
-//                     ) : (
-//                         <>
-//                             <MessageCircle className="w-5 h-5" />
-//                             <h2 className="font-semibold">Live Chat</h2>
-//                         </>
-//                     )}
-//                 </div>
-//                 <div className="flex items-center gap-2">
-//                     {selectedPartner && !showPartnerList && (
-//                         <>
-//                             <button className="p-1 hover:bg-white/20 rounded">
-//                                 <Phone className="w-4 h-4" />
-//                             </button>
-//                             <button className="p-1 hover:bg-white/20 rounded">
-//                                 <Video className="w-4 h-4" />
-//                             </button>
-//                             <button className="p-1 hover:bg-white/20 rounded">
-//                                 <MoreVertical className="w-4 h-4" />
-//                             </button>
-//                         </>
-//                     )}
-//                     <button
-//                         onClick={() => setIsOpen(false)}
-//                         className="p-1 hover:bg-white/20 rounded"
-//                     >
-//                         <X className="w-4 h-4" />
-//                     </button>
-//                 </div>
-//             </div>
-
-//             {/* Content */}
-//             <div className="flex-1 flex flex-col">
-//                 {showPartnerList ? (
-//                     /* Partner List */
-//                     <div className="flex-1 overflow-y-auto">
-//                         {chatPartners.length === 0 ? (
-//                             <div className="flex items-center justify-center h-full text-gray-500">
-//                                 <div className="text-center">
-//                                     <User className="w-8 h-8 mx-auto mb-2 opacity-50" />
-//                                     <p className="text-sm">No students assigned yet</p>
-//                                 </div>
-//                             </div>
-//                         ) : (
-//                             <div className="p-2">
-//                                 {chatPartners.map((partner) => {
-//                                     const partnerUnreadCount = unreadCounts[partner._id] || 0;
-//                                     const lastMessage = messages[partner._id]?.slice(-1)[0];
-
-//                                     return (
-//                                         <div
-//                                             key={partner._id}
-//                                             onClick={() => setSelectedPartner(partner)}
-//                                             className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors"
-//                                         >
-//                                             <div className="relative">
-//                                                 <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
-//                                                     <User className="w-5 h-5 text-indigo-600" />
-//                                                 </div>
-//                                                 {onlineUsers.has(partner._id) && (
-//                                                     <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-//                                                 )}
-//                                             </div>
-//                                             <div className="flex-1 min-w-0">
-//                                                 <div className="flex items-center justify-between">
-//                                                     <h4 className="font-medium text-sm text-gray-800 truncate">
-//                                                         {partner.fullname}
-//                                                     </h4>
-//                                                     {lastMessage && (
-//                                                         <span className="text-xs text-gray-500">
-//                                                             {formatTime(lastMessage.timestamp)}
-//                                                         </span>
-//                                                     )}
-//                                                 </div>
-//                                                 <div className="flex items-center justify-between">
-//                                                     <p className="text-xs text-gray-500 truncate">
-//                                                         {lastMessage ? 
-//                                                             `${lastMessage.senderName === user.fullname ? 'You: ' : ''}${lastMessage.content}` : 
-//                                                             'No messages yet'
-//                                                         }
-//                                                     </p>
-//                                                     {partnerUnreadCount > 0 && (
-//                                                         <span className="bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-//                                                             {partnerUnreadCount > 9 ? '9+' : partnerUnreadCount}
-//                                                         </span>
-//                                                     )}
-//                                                 </div>
-//                                             </div>
-//                                         </div>
-//                                     );
-//                                 })}
-//                             </div>
-//                         )}
-//                     </div>
-//                 ) : (
-//                     /* Chat Messages */
-//                     <>
-//                         <div className="flex-1 overflow-y-auto p-3 space-y-3">
-//                             {partnerMessages.length === 0 ? (
-//                                 <div className="flex items-center justify-center h-full text-gray-500">
-//                                     <div className="text-center">
-//                                         <MessageCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
-//                                         <p className="text-sm">Start a conversation!</p>
-//                                     </div>
-//                                 </div>
-//                             ) : (
-//                                 partnerMessages.map((message) => {
-//                                     const isOwn = message.senderId === user.id;
-//                                     return (
-//                                         <div
-//                                             key={message.id}
-//                                             className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
-//                                         >
-//                                             <div
-//                                                 className={`max-w-xs px-3 py-2 rounded-lg text-sm ${
-//                                                     isOwn
-//                                                         ? 'bg-indigo-600 text-white'
-//                                                         : 'bg-gray-100 text-gray-800'
-//                                                 }`}
-//                                             >
-//                                                 <p>{message.content}</p>
-//                                                 <div className={`flex items-center gap-1 mt-1 ${
-//                                                     isOwn ? 'justify-end' : 'justify-start'
-//                                                 }`}>
-//                                                     <span className={`text-xs ${
-//                                                         isOwn ? 'text-indigo-200' : 'text-gray-500'
-//                                                     }`}>
-//                                                         {formatTime(message.timestamp)}
-//                                                     </span>
-//                                                     {isOwn && (
-//                                                         <div className="text-indigo-200">
-//                                                             {message.pending ? (
-//                                                                 <Clock className="w-3 h-3" />
-//                                                             ) : message.read ? (
-//                                                                 <CheckCheck className="w-3 h-3" />
-//                                                             ) : (
-//                                                                 <div className="w-3 h-3 border border-indigo-200 rounded-full" />
-//                                                             )}
-//                                                         </div>
-//                                                     )}
-//                                                 </div>
-//                                             </div>
-//                                         </div>
-//                                     );
-//                                 })
-//                             )}
-//                             <div ref={messagesEndRef} />
-//                         </div>
-
-//                         {/* Message Input */}
-//                         <div className="border-t border-gray-200 p-3">
-//                             <form onSubmit={handleSendMessage} className="flex items-center gap-2">
-//                                 <input
-//                                     ref={chatInputRef}
-//                                     type="text"
-//                                     value={newMessage}
-//                                     onChange={handleTyping}
-//                                     placeholder="Type a message..."
-//                                     className="flex-1 border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-//                                     disabled={!isConnected}
-//                                 />
-//                                 <button
-//                                     type="submit"
-//                                     disabled={!newMessage.trim() || !isConnected}
-//                                     className="bg-indigo-600 text-white p-2 rounded-full hover:bg-indigo-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
-//                                 >
-//                                     <Send className="w-4 h-4" />
-//                                 </button>
-//                             </form>
-//                             {!isConnected && (
-//                                 <p className="text-xs text-red-500 mt-1 text-center">
-//                                     Disconnected - trying to reconnect...
-//                                 </p>
-//                             )}
-//                         </div>
-//                     </>
-//                 )}
-//             </div>
-//         </div>
-//     );
-// };
 
 export default function CoachDashboard() {
     const { user, logout } = useAuth();
@@ -574,8 +225,8 @@ export default function CoachDashboard() {
 
         setRemovingUser(userId);
         try {
-            const response = await fetch(`http://localhost:8000/api/coaches/remove-user/${userId}`, {
-                method: "DELETE",
+            const response = await fetch(`http://localhost:8000/api/coaches/assigned-users/remove/${userId}`, {
+                method: "PATCH",
                 headers: {
                     "Authorization": `Bearer ${token}`,
                     "Content-Type": "application/json",
@@ -1069,19 +720,19 @@ export default function CoachDashboard() {
                                         )}
 
                                         <div className="flex justify-end gap-3">
-                                            <div className="mt-4 text-right">
-                                                <Link to={`/chat/session/${interview._id}`} className="inline-flex items-center gap-2 px-4 py-2 bg-slate-700 text-white rounded-xl hover:bg-slate-800 transition-all duration-300 text-sm">
+                                           
+                                                <Link to={`/chat/session/${interview._id}`} className="inline-flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-xl hover:bg-slate-700 transition-colors duration-200 text-sm">
                                                     <Eye className="w-4 h-4" />
                                                     View Details
                                                 </Link>
-                                            </div>
+                                            
 
                                             {interview.hasFeedback ? (
                                                 <button
                                                     onClick={() => openFeedbackModal(interview)}
                                                     className="inline-flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-xl hover:bg-slate-700 transition-colors duration-200 text-sm"
                                                 >
-                                                    <Eye className="w-4 h-4" />
+                                                    <Edit className="w-4 h-4" />
                                                     Edit Feedback
                                                 </button>
                                             ) : (

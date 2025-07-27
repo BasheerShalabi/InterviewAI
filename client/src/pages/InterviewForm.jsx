@@ -18,7 +18,7 @@ export default function InterviewForm() {
         skills: [],
         cvFile: null,
         interviewType: 'technical',
-        duration: 0
+        numOfQuestions: 5
     });
     const [cvAnalysis, setCvAnalysis] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -75,7 +75,7 @@ export default function InterviewForm() {
             const res = await axios({ method: 'post', url: 'http://localhost:8000/api/sessions',
                 headers: { Authorization: `Bearer ${token}` } , data:{
                 raw: formData.raw,
-                numQuestions : formData.duration,
+                numQuestions : formData.numOfQuestions,
                 type: formData.interviewType,
             } 
         })
@@ -328,13 +328,13 @@ export default function InterviewForm() {
 
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        Nubmer of Questions
+                                        Number of Questions
                                     </label>
                                     <div className="relative">
                                         <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
                                         <select
-                                            name="duration"
-                                            value={formData.duration}
+                                            name="numOfQuestions"
+                                            value={formData.numOfQuestions}
                                             onChange={handleInputChange}
                                             className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all duration-300 bg-white/50 backdrop-blur-sm"
                                         >

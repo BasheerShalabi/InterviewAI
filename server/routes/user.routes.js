@@ -11,4 +11,6 @@ router.post('/login', userController.loginUser);
 router.post('/request/:coachId', verifyToken, coachController.requestCoach);
 router.post('/send-request', verifyToken, userController.sendRequest);
 
+router.get('/update', verifyToken, userController.updateToken);
+
 module.exports = router;
