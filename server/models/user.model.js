@@ -1,29 +1,29 @@
-const mongoose = require('mongoose')
-const bcrypt = require('bcrypt')
+const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
 
 const UserSchema = new mongoose.Schema({
     fullname: {
         type: String,
-        required: [true, "Name is required."],
-        minlength: [5, "Name must be more than 5 chars."],
-        maxlength: [50, "Title cannot be greater than or equal 50 chars."],
+        required: [true, "Full name is required."],
+        minlength: [5, "Full name must be at least 5 characters."],
+        maxlength: [50, "Full name must be less than 50 characters."]
     },
     email: {
         type: String,
         required: [true, "Email is required."],
-        match: [/.+\@.+\..+/, 'Please fill a valid email address'],
-        validate: validateEmail
+        match: [/.+\@.+\..+/, "Please enter a valid email address."],
+        unique: true, // Make sure emails are unique
     },
     role: {
         type: String,
-        required: [true, "Role is required."],
         enum: ["user", "coach", "admin"],
-        default: "user"
+        default: "user",
+        required: [true, "Role is required."]
     },
     password: {
         type: String,
-        required: true,
-        minlength: 6
+        required: [true, "Password is required."],
+        minlength: [6, "Password must be at least 6 characters."]
     },
     assignedCoachId: {
         type: mongoose.Schema.Types.ObjectId,
@@ -39,8 +39,19 @@ const UserSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     }
+});
 
-})
+UserSchema.path('email').validate({
+    isAsync: true,
+    validator: async function (value) {
+        if (this.isNew || this.isModified('email')) {
+            const existingUser = await mongoose.models.User.findOne({ email: value });
+            return !existingUser;
+        }
+        return true;
+    },
+    message: 'A user with this email already exists.'
+});
 
 UserSchema.pre('save', async function (next) {
     if (this.isModified('password')) {
@@ -50,11 +61,5 @@ UserSchema.pre('save', async function (next) {
     next();
 });
 
-async function validateEmail(email) {
-    const user = await this.constructor.findOne({ email })
-    if (user) throw new Error("A user is already registered with this email address.")
-}
-
-const User = mongoose.model('User', UserSchema)
-
+const User = mongoose.model('User', UserSchema);
 module.exports = User;

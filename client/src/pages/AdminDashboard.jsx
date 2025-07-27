@@ -548,6 +548,367 @@ export default function AdminDashboard() {
     const {user , logout} = useAuth()
     const {showAlert} = useAlert()
 
+    // PDF Export Function
+    const exportToPDF = async () => {
+        try {
+            // Import jsPDF dynamically
+            const { jsPDF } = await import('jspdf');
+            const doc = new jsPDF();
+            
+            const currentDate = new Date().toLocaleDateString();
+            let yPosition = 20;
+            
+            // Title
+            doc.setFontSize(20);
+            doc.setFont(undefined, 'bold');
+            doc.text('Admin Dashboard Report', 20, yPosition);
+            yPosition += 10;
+            
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'normal');
+            doc.text(`Generated on: ${currentDate}`, 20, yPosition);
+            yPosition += 20;
+            
+            // Overview Statistics
+            doc.setFontSize(16);
+            doc.setFont(undefined, 'bold');
+            doc.text('Overview Statistics', 20, yPosition);
+            yPosition += 15;
+            
+            doc.setFontSize(11);
+            doc.setFont(undefined, 'normal');
+            
+            const stats = {
+                totalUsers: users.length,
+                activeUsers: users.filter((u) => u.status === "active").length,
+                totalCoaches: coaches.length,
+                activeCoaches: coaches.filter((c) => c.status === "active").length,
+                totalInterviews: interviews.length,
+                completedInterviews: interviews.filter((i) => i.isComplete).length,
+                averageCompletionRate:
+                    users.length > 0
+                        ? (
+                            (users.reduce(
+                                (sum, u) =>
+                                    sum + u.completedInterviews / (u.totalInterviews || 1),
+                                0
+                            ) /
+                                users.length) *
+                            100
+                        ).toFixed(1)
+                        : 0,
+                averageUserRating:
+                    users.length > 0
+                        ? (
+                            users.reduce((sum, u) => sum + (u.averageRating || 0), 0) /
+                            users.length
+                        ).toFixed(1)
+                        : 0,
+            };
+            
+            const statsText = [
+                `Total Users: ${stats.totalUsers} (${stats.activeUsers} active)`,
+                `Total Coaches: ${stats.totalCoaches} (${stats.activeCoaches} active)`,
+                `Total Interviews: ${stats.totalInterviews} (${stats.completedInterviews} completed)`,
+                `Average Completion Rate: ${stats.averageCompletionRate}%`,
+                `Average User Rating: ${stats.averageUserRating}/5`
+            ];
+            
+            statsText.forEach(text => {
+                doc.text(text, 20, yPosition);
+                yPosition += 8;
+            });
+            
+            yPosition += 10;
+            
+            // Interview Distribution
+            doc.setFontSize(16);
+            doc.setFont(undefined, 'bold');
+            doc.text('Interview Distribution', 20, yPosition);
+            yPosition += 15;
+            
+            doc.setFontSize(11);
+            doc.setFont(undefined, 'normal');
+            
+            const technicalCount = interviews.filter((i) =>
+                i.type?.toLowerCase().includes("technical")
+            ).length;
+            const behavioralCount = interviews.filter((i) =>
+                i.type?.toLowerCase().includes("behavioural")
+            ).length;
+            const mixedCount = interviews.filter((i) =>
+                i.type?.toLowerCase().includes("hybrid")
+            ).length;
+            
+            const distributionText = [
+                `Technical Interviews: ${technicalCount} (${stats.totalInterviews > 0 ? ((technicalCount / stats.totalInterviews) * 100).toFixed(0) : 0}%)`,
+                `Behavioral Interviews: ${behavioralCount} (${stats.totalInterviews > 0 ? ((behavioralCount / stats.totalInterviews) * 100).toFixed(0) : 0}%)`,
+                `Mixed/Hybrid Interviews: ${mixedCount} (${stats.totalInterviews > 0 ? ((mixedCount / stats.totalInterviews) * 100).toFixed(0) : 0}%)`
+            ];
+            
+            distributionText.forEach(text => {
+                doc.text(text, 20, yPosition);
+                yPosition += 8;
+            });
+            
+            yPosition += 15;
+            
+            // Users Summary Table
+            if (yPosition > 250) {
+                doc.addPage();
+                yPosition = 20;
+            }
+            
+            doc.setFontSize(16);
+            doc.setFont(undefined, 'bold');
+            doc.text('Users Summary', 20, yPosition);
+            yPosition += 15;
+            
+            // Table headers
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'bold');
+            doc.text('Name', 20, yPosition);
+            doc.text('Email', 70, yPosition);
+            doc.text('Status', 120, yPosition);
+            doc.text('Interviews', 150, yPosition);
+            doc.text('Rating', 180, yPosition);
+            yPosition += 5;
+            
+            // Draw line under headers
+            doc.line(20, yPosition, 200, yPosition);
+            yPosition += 8;
+            
+            // Table data
+            doc.setFont(undefined, 'normal');
+            users.slice(0, 20).forEach(user => { // Limit to first 20 users to fit on page
+                if (yPosition > 270) {
+                    doc.addPage();
+                    yPosition = 20;
+                    // Redraw headers on new page
+                    doc.setFont(undefined, 'bold');
+                    doc.text('Name', 20, yPosition);
+                    doc.text('Email', 70, yPosition);
+                    doc.text('Status', 120, yPosition);
+                    doc.text('Interviews', 150, yPosition);
+                    doc.text('Rating', 180, yPosition);
+                    yPosition += 5;
+                    doc.line(20, yPosition, 200, yPosition);
+                    yPosition += 8;
+                    doc.setFont(undefined, 'normal');
+                }
+                
+                const userName = user.fullname?.length > 20 ? user.fullname.substring(0, 17) + '...' : user.fullname || 'N/A';
+                const userEmail = user.email?.length > 25 ? user.email.substring(0, 22) + '...' : user.email || 'N/A';
+                
+                doc.text(userName, 20, yPosition);
+                doc.text(userEmail, 70, yPosition);
+                doc.text(user.status || 'N/A', 120, yPosition);
+                doc.text(`${user.completedInterviews}/${user.totalInterviews}`, 150, yPosition);
+                doc.text((user.averageRating || 0).toString(), 180, yPosition);
+                yPosition += 7;
+            });
+            
+            yPosition += 15;
+            
+            // Coaches Summary Table
+            if (yPosition > 250) {
+                doc.addPage();
+                yPosition = 20;
+            }
+            
+            doc.setFontSize(16);
+            doc.setFont(undefined, 'bold');
+            doc.text('Coaches Summary', 20, yPosition);
+            yPosition += 15;
+            
+            // Table headers
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'bold');
+            doc.text('Name', 20, yPosition);
+            doc.text('Email', 70, yPosition);
+            doc.text('Status', 120, yPosition);
+            doc.text('Users', 150, yPosition);
+            doc.text('Feedbacks', 170, yPosition);
+            doc.text('Rating', 190, yPosition);
+            yPosition += 5;
+            
+            // Draw line under headers
+            doc.line(20, yPosition, 200, yPosition);
+            yPosition += 8;
+            
+            // Table data
+            doc.setFont(undefined, 'normal');
+            coaches.forEach(coach => {
+                if (yPosition > 270) {
+                    doc.addPage();
+                    yPosition = 20;
+                    // Redraw headers on new page
+                    doc.setFont(undefined, 'bold');
+                    doc.text('Name', 20, yPosition);
+                    doc.text('Email', 70, yPosition);
+                    doc.text('Status', 120, yPosition);
+                    doc.text('Users', 150, yPosition);
+                    doc.text('Feedbacks', 170, yPosition);
+                    doc.text('Rating', 190, yPosition);
+                    yPosition += 5;
+                    doc.line(20, yPosition, 200, yPosition);
+                    yPosition += 8;
+                    doc.setFont(undefined, 'normal');
+                }
+                
+                const coachName = coach.fullname?.length > 20 ? coach.fullname.substring(0, 17) + '...' : coach.fullname || 'N/A';
+                const coachEmail = coach.email?.length > 25 ? coach.email.substring(0, 22) + '...' : coach.email || 'N/A';
+                
+                doc.text(coachName, 20, yPosition);
+                doc.text(coachEmail, 70, yPosition);
+                doc.text(coach.status || 'N/A', 120, yPosition);
+                doc.text((coach.assignedUsers?.length || 0).toString(), 150, yPosition);
+                doc.text((coach.totalFeedbacks || 0).toString(), 170, yPosition);
+                doc.text((coach.averageRating || 0).toString(), 190, yPosition);
+                yPosition += 7;
+            });
+            
+            yPosition += 15;
+            
+            // Recent Interviews
+            if (yPosition > 220) {
+                doc.addPage();
+                yPosition = 20;
+            }
+            
+            doc.setFontSize(16);
+            doc.setFont(undefined, 'bold');
+            doc.text('Recent Interviews (Last 10)', 20, yPosition);
+            yPosition += 15;
+            
+            // Table headers
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'bold');
+            doc.text('User', 20, yPosition);
+            doc.text('Type', 60, yPosition);
+            doc.text('Coach', 100, yPosition);
+            doc.text('Status', 140, yPosition);
+            doc.text('Date', 170, yPosition);
+            yPosition += 5;
+            
+            // Draw line under headers
+            doc.line(20, yPosition, 200, yPosition);
+            yPosition += 8;
+            
+            // Table data
+            doc.setFont(undefined, 'normal');
+            interviews.slice(0, 10).forEach(interview => {
+                if (yPosition > 270) {
+                    doc.addPage();
+                    yPosition = 20;
+                    // Redraw headers on new page
+                    doc.setFont(undefined, 'bold');
+                    doc.text('User', 20, yPosition);
+                    doc.text('Type', 60, yPosition);
+                    doc.text('Coach', 100, yPosition);
+                    doc.text('Status', 140, yPosition);
+                    doc.text('Date', 170, yPosition);
+                    yPosition += 5;
+                    doc.line(20, yPosition, 200, yPosition);
+                    yPosition += 8;
+                    doc.setFont(undefined, 'normal');
+                }
+                
+                const userName = interview.userName?.length > 15 ? interview.userName.substring(0, 12) + '...' : interview.userName || 'N/A';
+                const interviewType = interview.type?.length > 15 ? interview.type.substring(0, 12) + '...' : interview.type || 'N/A';
+                const coachName = interview.coachName?.length > 15 ? interview.coachName.substring(0, 12) + '...' : interview.coachName || 'N/A';
+                const status = interview.isComplete ? 'Complete' : 'In Progress';
+                const date = new Date(interview.createdAt).toLocaleDateString();
+                
+                doc.text(userName, 20, yPosition);
+                doc.text(interviewType, 60, yPosition);
+                doc.text(coachName, 100, yPosition);
+                doc.text(status, 140, yPosition);
+                doc.text(date, 170, yPosition);
+                yPosition += 7;
+            });
+            
+            // Coaching Requests
+            if (requests.length > 0) {
+                yPosition += 15;
+                
+                if (yPosition > 240) {
+                    doc.addPage();
+                    yPosition = 20;
+                }
+                
+                doc.setFontSize(16);
+                doc.setFont(undefined, 'bold');
+                doc.text('Pending Coaching Requests', 20, yPosition);
+                yPosition += 15;
+                
+                // Table headers
+                doc.setFontSize(10);
+                doc.setFont(undefined, 'bold');
+                doc.text('Full Name', 20, yPosition);
+                doc.text('Email', 80, yPosition);
+                doc.text('Request Date', 140, yPosition);
+                yPosition += 5;
+                
+                // Draw line under headers
+                doc.line(20, yPosition, 200, yPosition);
+                yPosition += 8;
+                
+                // Table data
+                doc.setFont(undefined, 'normal');
+                requests.forEach(request => {
+                    if (yPosition > 270) {
+                        doc.addPage();
+                        yPosition = 20;
+                        // Redraw headers on new page
+                        doc.setFont(undefined, 'bold');
+                        doc.text('Full Name', 20, yPosition);
+                        doc.text('Email', 80, yPosition);
+                        doc.text('Request Date', 140, yPosition);
+                        yPosition += 5;
+                        doc.line(20, yPosition, 200, yPosition);
+                        yPosition += 8;
+                        doc.setFont(undefined, 'normal');
+                    }
+                    
+                    const requestName = request.fullname?.length > 25 ? request.fullname.substring(0, 22) + '...' : request.fullname || 'N/A';
+                    const requestEmail = request.email?.length > 25 ? request.email.substring(0, 22) + '...' : request.email || 'N/A';
+                    const requestDate = request.createdAt ? new Date(request.createdAt).toLocaleDateString() : 'N/A';
+                    
+                    doc.text(requestName, 20, yPosition);
+                    doc.text(requestEmail, 80, yPosition);
+                    doc.text(requestDate, 140, yPosition);
+                    yPosition += 7;
+                });
+            }
+            
+            // Footer
+            const pageCount = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                doc.setFontSize(8);
+                doc.setFont(undefined, 'normal');
+                doc.text(`Page ${i} of ${pageCount}`, 180, 285);
+                doc.text('Admin Dashboard Report - Confidential', 20, 285);
+            }
+            
+            // Save the PDF
+            const fileName = `admin-dashboard-report-${new Date().toISOString().split('T')[0]}.pdf`;
+            doc.save(fileName);
+            
+            // Show success message if showAlert is available
+            if (typeof showAlert === 'function') {
+                showAlert('PDF report generated successfully!', 'success');
+            }
+            
+        } catch (error) {
+            console.error('Error generating PDF:', error);
+            // Show error message if showAlert is available
+            if (typeof showAlert === 'function') {
+                showAlert('Error generating PDF report. Please try again.', 'error');
+            }
+        }
+    };
 
     // Safe fetch function with error handling
     const safeFetch = async (url, options = {}) => {
@@ -960,7 +1321,8 @@ export default function AdminDashboard() {
                             </p>
                         </div>
                         <div className="flex items-center gap-4">
-                            <button className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200">
+
+                            <button onClick={()=>exportToPDF()} className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200">
                                 <Download className="w-4 h-4" />
                                 Export Data
                             </button>

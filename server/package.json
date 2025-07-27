@@ -13,6 +13,8 @@
     "express": "^5.1.0",
     "gpt-3-encoder": "^1.1.4",
     "jsonwebtoken": "^9.0.2",
+    "jspdf": "^3.0.1",
+    "jspdf-autotable": "^5.0.2",
     "mongoose": "^8.16.4",
     "multer": "^2.0.2",
     "pdf-parse": "^1.1.1",
