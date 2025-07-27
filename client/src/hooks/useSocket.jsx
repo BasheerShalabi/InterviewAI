@@ -2,27 +2,37 @@ import { useState } from 'react';
 import { useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
 
-const useSocket = (userId, onMessage) => {
+const useSocket = (userId, onMessage , onOnlineUpdate) => {
     const socketRef = useRef(null);
     const [onlineMap, setOnlineMap] = useState({});
-    const [socket] = useState(io('http://localhost:8000', {
-        transports: ['websocket'], // force clean connection
+    const [socket] = useState(io(':8000', {
+        transports: ['websocket'], 
     }))
 
     useEffect(() => {
         if (!userId) return;
 
-        // const socket = io('http://localhost:8000'); // Adjust if needed
         socketRef.current = socket;
 
         socket.on('connect', () => {
             console.log('🔌 Socket connected:', socket.id);
-            socket.emit('register', { userId }); // Register the user
+            socket.emit('register', { userId });
+            socketRef.current.emit('get_online_users');
         });
 
         socket.on('private_message', (message) => {
             console.log('📩 Received message:', message);
             onMessage?.(message);
+        });
+
+        socketRef.current.on('online_users', (ids) => {
+            onOnlineUpdate(prev => {
+                const map = {};
+                ids.forEach(id => {
+                    map[id] = true;
+                });
+                return map;
+            });
         });
 
         socket.on('disconnect', () => {

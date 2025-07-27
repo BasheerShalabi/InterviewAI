@@ -685,31 +685,31 @@ const CoachesManagement = ({ coaches, onRefresh, handleDelete }) => {
 };
 
 export default function AdminDashboard() {
-    const [activeTab, setActiveTab] = useState("overview");
-    const [users, setUsers] = useState([]);
-    const [coaches, setCoaches] = useState([]);
-    const [interviews, setInterviews] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [searchTerm, setSearchTerm] = useState("");
-    const [requests, setRequests] = useState([]);
-    const { user, logout } = useAuth();
-    const { showAlert } = useAlert();
+  const [activeTab, setActiveTab] = useState("overview");
+  const [users, setUsers] = useState([]);
+  const [coaches, setCoaches] = useState([]);
+  const [interviews, setInterviews] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [requests, setRequests] = useState([]);
+  const { user, logout } = useAuth();
+  const { showAlert } = useAlert();
 
-    const handleDelete = async (userId) => {
-        const token = getToken();
+  const handleDelete = async (userId) => {
+    const token = getToken();
 
-        try {
-            const response = await fetch(
-                `http://localhost:8000/api/admin/delete-user/${userId}`,
-                {
-                    method: "DELETE",
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        "Content-Type": "application/json",
-                    },
-                }
-            );
+    try {
+      const response = await fetch(
+        `/api/admin/delete-user/${userId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
             const data = await response.json();
 
@@ -920,6 +920,7 @@ export default function AdminDashboard() {
             doc.setFont(undefined, "bold");
             doc.text("Coaches Summary", 20, yPosition);
             yPosition += 15;
+
 
             // Table headers
             doc.setFontSize(10);
@@ -1168,17 +1169,18 @@ export default function AdminDashboard() {
     const fetchCoachingRequests = async () => {
         const token = getToken();
 
-        try {
-            const response = await fetch(
-                "http://localhost:8000/api/admin/coaching-requests",
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            );
+         try {
+      const response = await fetch(
+        "/api/admin/coaching-requests",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
             const data = await response.json();
+
 
             if (!response.ok) {
                 throw new Error(data.message || "Failed to fetch");
@@ -1191,6 +1193,7 @@ export default function AdminDashboard() {
         }
     };
 
+
     // Fetch data from API
     const fetchData = async () => {
         const token = getToken();
@@ -1200,7 +1203,7 @@ export default function AdminDashboard() {
             setLoading(false);
             return;
         }
-
+      
         const headers = {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
@@ -1213,10 +1216,10 @@ export default function AdminDashboard() {
             // Fetch all users - try different endpoints
             console.log("Fetching all users...");
 
-            const usersData = await safeFetch(
-                "http://localhost:8000/api/admin/users",
-                { headers }
-            );
+              const usersData = await safeFetch(
+        "/api/admin/users",
+        { headers }
+      );
 
             if (usersData && Array.isArray(usersData)) {
                 console.log(`Found ${usersData.length} users`);
@@ -1241,29 +1244,29 @@ export default function AdminDashboard() {
                             .map((session) => session.coachFeedback?.rating);
 
                         const averageRating =
-                            ratingsWithFeedback?.length > 0
-                                ? (
-                                    ratingsWithFeedback.reduce(
-                                        (sum, rating) => sum + rating,
-                                        0
-                                    ) / ratingsWithFeedback.length
-                                ).toFixed(1)
-                                : 0;
+              ratingsWithFeedback?.length > 0
+                ? (
+                    ratingsWithFeedback.reduce(
+                      (sum, rating) => sum + rating,
+                      0
+                    ) / ratingsWithFeedback.length
+                  ).toFixed(1)
+                : 0;
 
-                        // Handle coach information
-                        let coachName = null;
-                        if (user.coachId) {
-                            if (typeof user.coachId === "object" && user.coachId.fullname) {
-                                coachName = user.coachId.fullname;
-                            } else if (typeof user.coachId === "string") {
-                                // Try to fetch coach details
-                                const coachData = await safeFetch(
-                                    `http://localhost:8000/api/coaches/${user.coachId}`,
-                                    { headers }
-                                );
-                                coachName =
-                                    coachData?.fullname || coachData?.name || "Unknown Coach";
-                            }
+            // Handle coach information
+            let coachName = null;
+            if (user.coachId) {
+              if (typeof user.coachId === "object" && user.coachId.fullname) {
+                coachName = user.coachId.fullname;
+              } else if (typeof user.coachId === "string") {
+                // Try to fetch coach details
+                const coachData = await safeFetch(
+                  `/api/coaches/${user.coachId}`,
+                  { headers }
+                );
+                coachName =
+                  coachData?.fullname || coachData?.name || "Unknown Coach";
+              }
                         }
 
                         return {
@@ -1281,98 +1284,98 @@ export default function AdminDashboard() {
                     })
                 );
 
-                setUsers(processedUsers);
-                console.log("Successfully processed users:", processedUsers.length);
-            } else {
-                console.warn("No users data received or data is not an array");
-                setUsers([]);
-            }
+                 setUsers(processedUsers);
+        console.log("Successfully processed users:", processedUsers.length);
+      } else {
+        console.warn("No users data received or data is not an array");
+        setUsers([]);
+      }
 
-            // Fetch all coaches
-            console.log("Fetching all coaches...");
-            const coachesData = await safeFetch(
-                "http://localhost:8000/api/admin/coaches",
-                { headers }
-            );
+      // Fetch all coaches
+      console.log("Fetching all coaches...");
+      const coachesData = await safeFetch(
+        "/api/admin/coaches",
+        { headers }
+      );
 
-            if (coachesData && Array.isArray(coachesData)) {
-                console.log(`Found ${coachesData.length} coaches`);
+      if (coachesData && Array.isArray(coachesData)) {
+        console.log(`Found ${coachesData.length} coaches`);
 
-                setCoaches(coachesData);
-                console.log(coaches);
-                console.log("Successfully processed coaches:", coachesData.length);
-            } else {
-                console.warn("No coaches data received");
-                setCoaches([]);
-            }
+        setCoaches(coachesData);
+        console.log(coaches);
+        console.log("Successfully processed coaches:", coachesData.length);
+      } else {
+        console.warn("No coaches data received");
+        setCoaches([]);
+      }
 
-            // Fetch all interviews/sessions
-            console.log("Fetching all interviews...");
-            let interviewsData = await safeFetch(
-                "http://localhost:8000/api/sessions/all",
-                { headers }
-            );
+      // Fetch all interviews/sessions
+      console.log("Fetching all interviews...");
+      let interviewsData = await safeFetch(
+        "/api/sessions/all",
+        { headers }
+      );
 
-            // Try alternative session endpoints
-            if (!interviewsData) {
-                interviewsData = await safeFetch(
-                    "http://localhost:8000/api/admin/sessions",
-                    { headers }
-                );
-            }
+      // Try alternative session endpoints
+      if (!interviewsData) {
+        interviewsData = await safeFetch(
+          "/api/admin/sessions",
+          { headers }
+        );
+      }
 
-            if (!interviewsData) {
-                interviewsData = await safeFetch(
-                    "http://localhost:8000/api/interviews",
-                    { headers }
-                );
-            }
+      if (!interviewsData) {
+        interviewsData = await safeFetch(
+          "/api/interviews",
+          { headers }
+        );
+      }
 
-            if (interviewsData && Array.isArray(interviewsData)) {
-                console.log(`Found ${interviewsData.length} interviews`);
+      if (interviewsData && Array.isArray(interviewsData)) {
+        console.log(`Found ${interviewsData.length} interviews`);
 
-                const processedInterviews = interviewsData.map((interview) => {
-                    const duration =
-                        interview.completedAt && interview.createdAt
-                            ? Math.round(
-                                (new Date(interview.completedAt) -
-                                    new Date(interview.createdAt)) /
-                                (1000 * 60)
-                            )
-                            : null;
+        const processedInterviews = interviewsData.map((interview) => {
+          const duration =
+            interview.completedAt && interview.createdAt
+              ? Math.round(
+                  (new Date(interview.completedAt) -
+                    new Date(interview.createdAt)) /
+                    (1000 * 60)
+                )
+              : null;
 
-                    // Handle user information
-                    const userName =
-                        interview.user?.fullname ||
-                        interview.user?.name ||
-                        interview.userName ||
-                        "Unknown User";
+          // Handle user information
+          const userName =
+            interview.user?.fullname ||
+            interview.user?.name ||
+            interview.userName ||
+            "Unknown User";
 
-                    // Handle coach information
-                    const coachName =
-                        interview.coach?.fullname ||
-                        interview.coach?.name ||
-                        interview.coachName ||
-                        (interview.coachId ? "Coach" : "AI Assistant");
+          // Handle coach information
+          const coachName =
+            interview.coach?.fullname ||
+            interview.coach?.name ||
+            interview.coachName ||
+            (interview.coachId ? "Coach" : "AI Assistant");
 
-                    return {
-                        _id: interview._id,
-                        userId: interview.user?._id || interview.userId,
-                        userName,
-                        coachId: interview.coach?._id || interview.coachId,
-                        coachName,
-                        type: interview.type || interview.interviewType || "General",
-                        isComplete:
-                            interview.isComplete || interview.status === "completed",
-                        rating: interview.coachFeedback?.rating || interview.rating || null,
-                        createdAt: interview.createdAt,
-                        completedAt: interview.completedAt,
-                        duration,
-                        status:
-                            interview.status ||
-                            (interview.isComplete ? "completed" : "in-progress"),
-                    };
-                });
+          return {
+            _id: interview._id,
+            userId: interview.user?._id || interview.userId,
+            userName,
+            coachId: interview.coach?._id || interview.coachId,
+            coachName,
+            type: interview.type || interview.interviewType || "General",
+            isComplete:
+              interview.isComplete || interview.status === "completed",
+            rating: interview.coachFeedback?.rating || interview.rating || null,
+            createdAt: interview.createdAt,
+            completedAt: interview.completedAt,
+            duration,
+            status:
+              interview.status ||
+              (interview.isComplete ? "completed" : "in-progress"),
+          };
+        });
 
                 setInterviews(processedInterviews);
                 console.log(
@@ -1395,14 +1398,14 @@ export default function AdminDashboard() {
     const acceptRequest = async (userId) => {
         const token = getToken();
 
-        try {
-            const response = await fetch(
-                `http://localhost:8000/api/admin/accept-coaching-request/${userId}`,
-                {
-                    method: "POST",
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
+       try {
+      const response = await fetch(
+        `/api/admin/accept-coaching-request/${userId}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
                 }
             );
 
@@ -1413,6 +1416,7 @@ export default function AdminDashboard() {
             }
 
             showAlert(`Request accepted: ${data.message}`, "success");
+
 
             // Optional: refresh the list or remove the accepted user from state
             setRequests((prev) => prev.filter((u) => u._id !== userId));
@@ -1426,13 +1430,13 @@ export default function AdminDashboard() {
         const token = getToken();
 
         try {
-            const response = await fetch(
-                `http://localhost:8000/api/admin/decline-coaching-request/${userId}`,
-                {
-                    method: "POST",
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
+      const response = await fetch(
+        `/api/admin/decline-coaching-request/${userId}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
                 }
             );
 

@@ -13,7 +13,10 @@ const PORT = process.env.PORT;
 const server = http.createServer(app);
 
 // CORS configuration
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:5173',
+    credentials: true
+}));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -28,15 +31,12 @@ app.use('/api/admin', require('./routes/admin.routes'));
 app.use('/api/chat', require('./routes/chat.routes'))
 
 
-server.listen(PORT, () => {
+server.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on port ${PORT}`);
     console.log('Socket.IO chat server initialized');
 });
 const io = new Server(server, {
-    cors: {
-        origin: '*',
-        methods: ['GET', 'POST'],
-    },
+    cors: true
 });
 
 // === Socket.IO logic ===
@@ -50,6 +50,11 @@ io.on('connection', (socket) => {
         socket.userId = userId;
         io.emit('user_online', { userId });
         console.log(`User ${userId} is online`);
+    });
+
+    socket.on('get_online_users', () => {
+        const onlineIds = Array.from(onlineUsers.keys());
+        socket.emit('online_users', onlineIds);
     });
 
     socket.on('private_message', async ({ from, to, content }) => {
