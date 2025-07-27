@@ -15,4 +15,6 @@ router.post('/accept-coaching-request/:userId', verifyToken, requireRole(['admin
 
 router.post('/decline-coaching-request/:userId', verifyToken, requireRole(['admin']), adminController.declineCoachingRequest);
 
+router.delete('/delete-user/:userId', verifyToken, requireRole(['admin']), adminController.deleteUser);
+
 module.exports = router;

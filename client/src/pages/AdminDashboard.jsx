@@ -26,12 +26,12 @@ import { Link } from "react-router-dom";
 import { useAlert } from "../context/AlertContext";
 
 // Users Management Component
-const UsersManagement = ({ users, onRefresh }) => {
+const UsersManagement = ({ users, onRefresh , handleDelete }) => {
     const [searchTerm, setSearchTerm] = useState("");
     const [filterType, setFilterType] = useState("all");
     const [selectedUser, setSelectedUser] = useState(null);
     const [showModal, setShowModal] = useState(false);
-    const { showAlert } = useAlert
+    const { showAlert } = useAlert()
 
     const filteredUsers = users.filter((user) => {
         const matchesSearch =
@@ -154,7 +154,7 @@ const UsersManagement = ({ users, onRefresh }) => {
                                     <button className="p-2 text-slate-600 hover:text-green-600 transition-colors duration-200">
                                         <Edit className="w-4 h-4" />
                                     </button>
-                                    <button className="p-2 text-slate-600 hover:text-red-600 transition-colors duration-200">
+                                    <button onClick={()=>handleDelete(user._id)} className="p-2 text-slate-600 hover:text-red-600 transition-colors duration-200">
                                         <Trash2 className="w-4 h-4" />
                                     </button>
                                 </div>
@@ -318,7 +318,7 @@ const UsersManagement = ({ users, onRefresh }) => {
 };
 
 // Coaches Management Component
-const CoachesManagement = ({ coaches, onRefresh }) => {
+const CoachesManagement = ({ coaches, onRefresh , handleDelete }) => {
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedCoach, setSelectedCoach] = useState(null);
     const [showModal, setShowModal] = useState(false);
@@ -409,7 +409,7 @@ const CoachesManagement = ({ coaches, onRefresh }) => {
                         <button className="p-2 text-slate-600 hover:text-green-600 transition-colors duration-200">
                             <Edit className="w-4 h-4" />
                         </button>
-                        <button className="p-2 text-slate-600 hover:text-red-600 transition-colors duration-200">
+                        <button onClick={()=>handleDelete(coach._id)} className="p-2 text-slate-600 hover:text-red-600 transition-colors duration-200">
                             <Trash2 className="w-4 h-4" />
                         </button>
                     </div>
@@ -543,6 +543,33 @@ export default function AdminDashboard() {
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [requests, setRequests] = useState([]);
+
+    const handleDelete = async (userId) => {
+        const token = getToken();
+
+        try {
+            const response = await fetch(`http://localhost:8000/api/admin/delete-user/${userId}`, {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Failed to fetch');
+            }
+
+            console.log('user Deleted successfuly', data);
+            setUsers((prevUsers) => prevUsers.filter((user) => user._id !== userId));
+            setCoaches((prevCoaches) => prevCoaches.filter((coach) => coach._id !== userId));
+        } catch (err) {
+            console.error('Failed to delete user:', err);
+        }
+    }
+
 
     // PDF Export Function
     const exportToPDF = async () => {
@@ -1584,12 +1611,12 @@ export default function AdminDashboard() {
 
                 {/* Users Tab */}
                 {activeTab === "users" && (
-                    <UsersManagement users={users} onRefresh={fetchData} />
+                    <UsersManagement users={users} handleDelete={handleDelete} onRefresh={fetchData} />
                 )}
 
                 {/* Coaches Tab */}
                 {activeTab === "coaches" && (
-                    <CoachesManagement coaches={coaches} onRefresh={fetchData} />
+                    <CoachesManagement coaches={coaches} handleDelete={handleDelete} onRefresh={fetchData} />
                 )}
 
                 {/* Interviews Tab */}
