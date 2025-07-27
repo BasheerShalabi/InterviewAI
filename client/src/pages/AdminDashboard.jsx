@@ -546,7 +546,7 @@ export default function AdminDashboard() {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/api/admin/delete-user/${userId}`,
+        `/api/admin/delete-user/${userId}`,
         {
           method: "DELETE",
           headers: {
@@ -1018,7 +1018,7 @@ export default function AdminDashboard() {
 
     try {
       const response = await fetch(
-        "http://localhost:8000/api/admin/coaching-requests",
+        "/api/admin/coaching-requests",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -1062,7 +1062,7 @@ export default function AdminDashboard() {
       console.log("Fetching all users...");
 
       const usersData = await safeFetch(
-        "http://localhost:8000/api/admin/users",
+        "/api/admin/users",
         { headers }
       );
 
@@ -1106,7 +1106,7 @@ export default function AdminDashboard() {
               } else if (typeof user.coachId === "string") {
                 // Try to fetch coach details
                 const coachData = await safeFetch(
-                  `http://localhost:8000/api/coaches/${user.coachId}`,
+                  `/api/coaches/${user.coachId}`,
                   { headers }
                 );
                 coachName =
@@ -1139,7 +1139,7 @@ export default function AdminDashboard() {
       // Fetch all coaches
       console.log("Fetching all coaches...");
       const coachesData = await safeFetch(
-        "http://localhost:8000/api/admin/coaches",
+        "/api/admin/coaches",
         { headers }
       );
 
@@ -1157,21 +1157,21 @@ export default function AdminDashboard() {
       // Fetch all interviews/sessions
       console.log("Fetching all interviews...");
       let interviewsData = await safeFetch(
-        "http://localhost:8000/api/sessions/all",
+        "/api/sessions/all",
         { headers }
       );
 
       // Try alternative session endpoints
       if (!interviewsData) {
         interviewsData = await safeFetch(
-          "http://localhost:8000/api/admin/sessions",
+          "/api/admin/sessions",
           { headers }
         );
       }
 
       if (!interviewsData) {
         interviewsData = await safeFetch(
-          "http://localhost:8000/api/interviews",
+          "/api/interviews",
           { headers }
         );
       }
@@ -1245,7 +1245,7 @@ export default function AdminDashboard() {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/api/admin/accept-coaching-request/${userId}`,
+        `/api/admin/accept-coaching-request/${userId}`,
         {
           method: "POST",
           headers: {
@@ -1275,7 +1275,7 @@ export default function AdminDashboard() {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/api/admin/decline-coaching-request/${userId}`,
+        `/api/admin/decline-coaching-request/${userId}`,
         {
           method: "POST",
           headers: {

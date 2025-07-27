@@ -46,7 +46,7 @@ export default function InterviewForm() {
         setLoading(true);
 
 
-        const res = await axios.post('http://localhost:8000/api/cv/upload', formData, {
+        const res = await axios.post('/api/cv/upload', formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
         });
 
@@ -72,7 +72,7 @@ export default function InterviewForm() {
 
     const startInterview = async () => {
         try {
-            const res = await axios({ method: 'post', url: 'http://localhost:8000/api/sessions',
+            const res = await axios({ method: 'post', url: '/api/sessions',
                 headers: { Authorization: `Bearer ${token}` } , data:{
                 raw: formData.raw,
                 numQuestions : formData.numOfQuestions,

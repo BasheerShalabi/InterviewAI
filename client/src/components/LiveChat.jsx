@@ -7,10 +7,12 @@ const LiveChat = ({ user, chatPartners }) => {
     const [messages, setMessages] = useState({});
     const [newMsg, setNewMsg] = useState('');
     const messagesEndRef = useRef(null);
+    const [onlineMap, setOnlineMap] = useState({});
+
 
     const token = localStorage.getItem('session')
 
-    const { sendMessage , onlineMap } = useSocket(user.id, (incomingMsg) => {
+    const { sendMessage } = useSocket(user.id, (incomingMsg) => {
         const { from, to } = incomingMsg;
 
         // Determine who the other person is in this conversation
@@ -21,7 +23,7 @@ const LiveChat = ({ user, chatPartners }) => {
             ...prev,
             [partnerId]: [...(prev[partnerId] || []), incomingMsg]
         }));
-    });
+    } , setOnlineMap);
 
     const handleSend = (e) => {
         e.preventDefault();
@@ -55,7 +57,7 @@ const LiveChat = ({ user, chatPartners }) => {
 
     useEffect(() => {
         if (selectedPartner) {
-            fetch(`http://localhost:8000/api/chat/${selectedPartner._id}`, {
+            fetch(`/api/chat/${selectedPartner._id}`, {
                 headers: {
                     Authorization: `Bearer ${token}` // if using JWT
                 }

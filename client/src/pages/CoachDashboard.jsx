@@ -43,7 +43,7 @@ export default function CoachDashboard() {
             if (!token) return;
 
             try {
-                const response = await axios.get('http://localhost:8000/api/chat/partners', {
+                const response = await axios.get('/api/chat/partners', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
@@ -87,7 +87,7 @@ export default function CoachDashboard() {
 
                 // Fetch requests
                 console.log("Fetching coaching requests...");
-                const resRequests = await fetch("http://localhost:8000/api/coaches/requests", {
+                const resRequests = await fetch("/api/coaches/requests", {
                     headers: {
                         "Authorization": `Bearer ${token}`,
                         "Content-Type": "application/json"
@@ -104,7 +104,7 @@ export default function CoachDashboard() {
 
                 // Fetch assigned users
                 console.log("Fetching assigned users...");
-                const resUsers = await fetch("http://localhost:8000/api/coaches/assigned-users", {
+                const resUsers = await fetch("/api/coaches/assigned-users", {
                     headers: {
                         "Authorization": `Bearer ${token}`,
                         "Content-Type": "application/json"
@@ -121,7 +121,7 @@ export default function CoachDashboard() {
 
                 // Fetch completed interviews for feedback
                 console.log("Fetching user sessions...");
-                const resInterviews = await fetch("http://localhost:8000/api/coaches/assigned-users/sessions", {
+                const resInterviews = await fetch("/api/coaches/assigned-users/sessions", {
                     headers: {
                         "Authorization": `Bearer ${token}`,
                         "Content-Type": "application/json"
@@ -183,7 +183,7 @@ export default function CoachDashboard() {
         }
 
         try {
-            const response = await fetch(`http://localhost:8000/api/coaches/respond/${userId}`, {
+            const response = await fetch(`/api/coaches/respond/${userId}`, {
                 method: "POST",
                 headers: {
                     "Authorization": `Bearer ${token}`,
@@ -199,7 +199,7 @@ export default function CoachDashboard() {
             setRequests((prev) => prev.filter((r) => r._id !== userId));
 
             // Refresh assigned users
-            const resUsers = await fetch("http://localhost:8000/api/coaches/assigned-users", {
+            const resUsers = await fetch("/api/coaches/assigned-users", {
                 headers: {
                     "Authorization": `Bearer ${token}`,
                     "Content-Type": "application/json"
@@ -225,7 +225,7 @@ export default function CoachDashboard() {
 
         setRemovingUser(userId);
         try {
-            const response = await fetch(`http://localhost:8000/api/coaches/assigned-users/remove/${userId}`, {
+            const response = await fetch(`/api/coaches/assigned-users/remove/${userId}`, {
                 method: "PATCH",
                 headers: {
                     "Authorization": `Bearer ${token}`,
@@ -262,7 +262,7 @@ export default function CoachDashboard() {
 
         setSubmittingFeedback(true);
         try {
-            const response = await fetch(`http://localhost:8000/api/sessions/${feedbackModal.interviewId}/coach-feedback`, {
+            const response = await fetch(`/api/sessions/${feedbackModal.interviewId}/coach-feedback`, {
                 method: "PATCH",
                 headers: {
                     "Authorization": `Bearer ${token}`,

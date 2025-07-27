@@ -43,7 +43,7 @@ export default function UserDashboard() {
 
     const fetchUserData = async () => {
         try {
-            const res = await axios.get("http://localhost:8000/api/user/profile", {
+            const res = await axios.get("/api/user/profile", {
                 headers: { Authorization: `Bearer ${token}` },
             });
             const updatedUser = res.data;
@@ -75,7 +75,7 @@ export default function UserDashboard() {
 
     const fetchCoaches = async () => {
         try {
-            const res = await axios.get("http://localhost:8000/api/coaches", {
+            const res = await axios.get("/api/coaches", {
                 headers: { Authorization: `Bearer ${token}` },
             });
             const data = res.data;
@@ -90,7 +90,7 @@ export default function UserDashboard() {
             if (!token) return;
 
             try {
-                const response = await axios.get('http://localhost:8000/api/chat/partners', {
+                const response = await axios.get('/api/chat/partners', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
@@ -162,7 +162,7 @@ const getCurrentCoachName = () => {
 const sendRequest = async () => {
     try {
         const response = await fetch(
-            "http://localhost:8000/api/users/send-request",
+            "/api/users/send-request",
             {
                 method: "POST",
                 headers: {
@@ -182,7 +182,7 @@ const sendRequest = async () => {
 
 const fetchData = async () => {
     try {
-        const res = await fetch("http://localhost:8000/api/sessions", {
+        const res = await fetch("/api/sessions", {
             headers: {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`,
@@ -212,7 +212,7 @@ const handleRequestCoach = async () => {
         const selected = coaches.find((c) => c.name === selectedCoach);
         if (!selected) return;
 
-        await fetch(`http://localhost:8000/api/users/request/${selected.id}`, {
+        await fetch(`/api/users/request/${selected.id}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

@@ -26,7 +26,7 @@ export default function AIChatBox() {
         setSending(true)
         try {
             const res = await axios({
-                method: 'get', url: `http://localhost:8000/api/sessions/${id}`,
+                method: 'get', url: `/api/sessions/${id}`,
                 headers: { Authorization: `Bearer ${token}` }
             })
 
@@ -53,7 +53,7 @@ export default function AIChatBox() {
         setSending(true)
         try {
             const res = await axios({
-                method: 'post', url: `http://localhost:8000/api/sessions/${id}/message`,
+                method: 'post', url: `/api/sessions/${id}/message`,
                 headers: { Authorization: `Bearer ${token}` }, data: { content: "start" }
             })
 
@@ -93,7 +93,7 @@ export default function AIChatBox() {
 
         try {
             const res = await axios({
-                method: 'post', url: `http://localhost:8000/api/sessions/${id}/message`,
+                method: 'post', url: `/api/sessions/${id}/message`,
                 headers: { Authorization: `Bearer ${token}` }, data: { content: input }
             })
 

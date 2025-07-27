@@ -71,7 +71,7 @@ export const AuthProvider = ({ children }) => {
         const token = localStorage.getItem("session");
         try{
 
-            const res = await fetch("http://localhost:8000/api/users/update", {
+            const res = await fetch("/api/users/update", {
                 headers: {
                     "Authorization": `Bearer ${token}`,
                     "Content-Type": "application/json",
@@ -95,7 +95,7 @@ export const AuthProvider = ({ children }) => {
 
     const register = async (fullname, email, password) => {
         try {
-            const response = await fetch("http://localhost:8000/api/users/register", {
+            const response = await fetch("/api/users/register", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
