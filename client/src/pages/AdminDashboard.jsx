@@ -21,6 +21,7 @@ import { Link } from "react-router-dom";
 import { useAlert } from "../context/AlertContext";
 import { useAuth } from "../context/AuthContext";
 import HeaderComponent from "../components/HeaderComponent";
+import FooterComponent from "../components/FooterComponent";
 
 // Confirmation Modal Component
 const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message, itemName, isLoading }) => {
@@ -1535,7 +1536,7 @@ export default function AdminDashboard() {
         );
     }
 
-    return (
+    return (<>
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-100">
             <HeaderComponent user={user} logout={logout} />
             {/* Header */}
@@ -1932,5 +1933,7 @@ export default function AdminDashboard() {
                 )}
             </div>
         </div>
+            <FooterComponent/>
+        </>
     );
 }
