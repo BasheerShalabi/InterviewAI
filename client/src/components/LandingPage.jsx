@@ -115,7 +115,7 @@ export default function LandingPage() {
                             transition={{ duration: 0.8, delay: 0.8 }}
                         >
                             <div className="group hover:scale-105 transition-transform duration-300">
-                                <div className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">15min</div>
+                                <div className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">5min</div>
                                 <div className="text-sm text-slate-500 group-hover:text-slate-600 transition-colors duration-300">Average Setup</div>
                             </div>
                             <div className="group hover:scale-105 transition-transform duration-300">
